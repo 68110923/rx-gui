@@ -7,17 +7,15 @@ import com.reasonix.gui.runner.ReasonixRunner
 import com.reasonix.gui.runner.SetupRunner
 import java.awt.*
 import java.awt.event.ActionEvent
+import java.awt.event.KeyEvent
 import javax.swing.*
 import javax.swing.border.EmptyBorder
+import javax.swing.border.MatteBorder
 
-/**
- * 主面板 — CardLayout 切换 Chat 和 Settings 视图。
- */
 class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
 
     private val cardLayout = CardLayout()
     private val cardPanel = JPanel(cardLayout)
-
     private val chatView = ChatView()
     private val settingsView = SettingsView { cardLayout.show(cardPanel, "chat") }
 
@@ -29,18 +27,15 @@ class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
         preferredSize = Dimension(420, 600)
     }
 
-    fun switchToChat() = cardLayout.show(cardPanel, "chat")
-    fun switchToSettings() = cardLayout.show(cardPanel, "settings")
-
-    // ═══════════════════════════════════════════════════════
-    //  Chat View
-    // ═══════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════
+    //  Chat
+    // ═══════════════════════════════════════════════
 
     private inner class ChatView : JPanel(BorderLayout()) {
 
         private val messageContainer = JPanel()
         private val messageScroll = JScrollPane(messageContainer)
-        private val inputField = JTextField()
+        private val inputArea = JTextArea(3, 20)
         private val sendButton = JButton("Send")
         private val selectedBanner = JLabel()
         private var thinkingPanel: JPanel? = null
@@ -54,45 +49,37 @@ class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
         }
 
         private fun setupUI() {
-            // ── 顶部栏 ──
+            // 顶部栏 — 只保留状态和工具按钮
             val topBar = JPanel(BorderLayout())
-            topBar.border = BorderFactory.createMatteBorder(0, 0, 1, 0, Color(0xE0E0E0))
+            topBar.border = MatteBorder(0, 0, 1, 0, Color(0xE0E0E0))
 
             val left = JPanel(FlowLayout(FlowLayout.LEFT, 8, 4))
             val statusDot = JLabel("●").apply {
                 foreground = Color(0x4CAF50)
                 font = Font(name, Font.PLAIN, 12)
             }
-            val title = JLabel("RX GUI").apply { font = Font(name, Font.BOLD, 13) }
-            val proj = JLabel(project.name).apply {
+            val projectName = JLabel(project.name).apply {
                 font = Font(name, Font.PLAIN, 11)
-                foreground = Color(0x9E9E9E)
+                foreground = Color(0x808080)
             }
             left.add(statusDot)
-            left.add(title)
-            left.add(proj)
+            left.add(projectName)
 
-            val settingsBtn = JButton("⚙").apply {
-                isOpaque = false
-                isContentAreaFilled = false
-                border = BorderFactory.createEmptyBorder(2, 6, 2, 6)
-                font = Font(name, Font.PLAIN, 14)
-                toolTipText = "Settings / 设置"
-                addActionListener { switchToSettings() }
-            }
-            val clearBtn = JButton("Clear").apply {
-                isOpaque = false
-                border = BorderFactory.createEmptyBorder(2, 8, 2, 8)
-                font = Font(name, Font.PLAIN, 11)
-                addActionListener {
-                    messageContainer.removeAll()
-                    addWelcome()
-                    messageContainer.revalidate()
-                    messageContainer.repaint()
-                }
+            // 扁平按钮
+            val clearBtn = flatButton("Clear")
+            clearBtn.addActionListener {
+                messageContainer.removeAll()
+                addWelcome()
+                messageContainer.revalidate()
+                messageContainer.repaint()
             }
 
-            val right = JPanel(FlowLayout(FlowLayout.RIGHT, 4, 4))
+            val settingsBtn = flatButton("\u2699") // ⚙
+            settingsBtn.font = Font(name, Font.PLAIN, 14)
+            settingsBtn.toolTipText = "Settings"
+            settingsBtn.addActionListener { cardLayout.show(cardPanel, "settings") }
+
+            val right = JPanel(FlowLayout(FlowLayout.RIGHT, 2, 2))
             right.add(clearBtn)
             right.add(settingsBtn)
 
@@ -100,7 +87,7 @@ class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
             topBar.add(right, BorderLayout.EAST)
             add(topBar, BorderLayout.NORTH)
 
-            // ── 消息区 ──
+            // 消息区
             messageContainer.layout = BoxLayout(messageContainer, BoxLayout.Y_AXIS)
             messageContainer.background = Color(0xFAFAFA)
             messageScroll.border = null
@@ -108,7 +95,7 @@ class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
             messageScroll.horizontalScrollBarPolicy = JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
             add(messageScroll, BorderLayout.CENTER)
 
-            // ── 底部 ──
+            // 底部
             val bottom = JPanel(BorderLayout())
 
             selectedBanner.apply {
@@ -116,7 +103,7 @@ class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
                 font = Font("Monospaced", Font.PLAIN, 11)
                 foreground = Color(0x607D8B)
                 border = BorderFactory.createCompoundBorder(
-                    BorderFactory.createMatteBorder(1, 0, 0, 0, Color(0xE0E0E0)),
+                    MatteBorder(1, 0, 0, 0, Color(0xFFCC80)),
                     EmptyBorder(4, 10, 4, 10)
                 )
                 background = Color(0xFFF3E0)
@@ -124,48 +111,97 @@ class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
             }
             bottom.add(selectedBanner, BorderLayout.NORTH)
 
+            // 输入区域：JTextArea + scroll，默认 3 行，最高占 80%
             val inputPanel = JPanel(BorderLayout(6, 0))
             inputPanel.border = BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(1, 0, 0, 0, Color(0xE0E0E0)),
+                MatteBorder(1, 0, 0, 0, Color(0xE0E0E0)),
                 EmptyBorder(8, 8, 8, 8)
             )
-            inputField.border = BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color(0xCCCCCC)),
-                EmptyBorder(6, 8, 6, 8)
-            )
-            sendButton.isEnabled = false
-            inputPanel.add(inputField, BorderLayout.CENTER)
-            inputPanel.add(sendButton, BorderLayout.EAST)
-            bottom.add(inputPanel, BorderLayout.SOUTH)
 
+            inputArea.apply {
+                lineWrap = true
+                wrapStyleWord = true
+                font = Font("Monospaced", Font.PLAIN, 12)
+                border = BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(Color(0xCCCCCC)),
+                    EmptyBorder(6, 8, 6, 8)
+                )
+                // Ctrl+Enter 发送
+                inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, Toolkit.getDefaultToolkit().menuShortcutKeyMaskEx), "send")
+                actionMap.put("send", object : AbstractAction() {
+                    override fun actionPerformed(e: ActionEvent?) = send()
+                })
+            }
+
+            val inputScroll = JScrollPane(inputArea).apply {
+                verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
+                horizontalScrollBarPolicy = JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+                preferredSize = Dimension(380, inputArea.preferredSize.height + 4)
+            }
+
+            inputPanel.add(inputScroll, BorderLayout.CENTER)
+            inputPanel.add(sendButton, BorderLayout.EAST)
+            sendButton.isEnabled = false
+
+            bottom.add(inputPanel, BorderLayout.SOUTH)
             add(bottom, BorderLayout.SOUTH)
+
+            // 监听输入框高度变化，限制 80%
+            inputArea.document.addDocumentListener(object : javax.swing.event.DocumentListener {
+                override fun insertUpdate(e: javax.swing.event.DocumentEvent?) = adjustInputHeight()
+                override fun removeUpdate(e: javax.swing.event.DocumentEvent?) = adjustInputHeight()
+                override fun changedUpdate(e: javax.swing.event.DocumentEvent?) = adjustInputHeight()
+            })
+        }
+
+        private fun adjustInputHeight() {
+            val maxH = (this.height * 0.8).toInt().coerceAtLeast(60)
+            val pref = inputArea.preferredSize.height
+            val newH = pref.coerceAtMost(maxH).coerceAtLeast(50)
+            (inputArea.parent as? JScrollPane)?.preferredSize = Dimension(380, newH + 4)
+            parent?.revalidate()
+        }
+
+        private fun flatButton(text: String) = JButton(text).apply {
+            isOpaque = false
+            isContentAreaFilled = false
+            border = EmptyBorder(4, 6, 4, 6)
+            font = Font(name, Font.PLAIN, 12)
+            cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
         }
 
         private fun setupActions() {
-            inputField.addActionListener { send() }
             sendButton.addActionListener { send() }
-            inputField.document.addDocumentListener(object : javax.swing.event.DocumentListener {
+            // Enter = send (only if no modifier)
+            inputArea.inputMap.put(KeyStroke.getKeyStroke("ENTER"), "send-plain")
+            inputArea.actionMap.put("send-plain", object : AbstractAction() {
+                override fun actionPerformed(e: ActionEvent?) = send()
+            })
+
+            inputArea.document.addDocumentListener(object : javax.swing.event.DocumentListener {
                 override fun insertUpdate(e: javax.swing.event.DocumentEvent?) { updateSend() }
                 override fun removeUpdate(e: javax.swing.event.DocumentEvent?) { updateSend() }
                 override fun changedUpdate(e: javax.swing.event.DocumentEvent?) { updateSend() }
-                private fun updateSend() { sendButton.isEnabled = inputField.text.isNotBlank() && !thinking }
+                private fun updateSend() {
+                    sendButton.isEnabled = inputArea.text.isNotBlank() && !thinking
+                }
             })
             Timer(500) { checkSelection() }.start()
         }
 
         private fun addWelcome() {
-            addAssistantMsg("<h3>👋 Welcome to RX GUI</h3><p>Select code, type a question, click <b>Send</b>.<br>Settings → ⚙ top-right</p>")
+            addAssistantMsg("<h3>👋 Welcome to RX GUI</h3><p>Select code, type, click <b>Send</b> or press <b>Enter</b>.<br>Settings → top-right ⚙</p>")
         }
 
         private fun send() {
-            val input = inputField.text.trim()
+            val input = inputArea.text.trim()
             if (input.isEmpty() || thinking) return
 
             val ctx = getCodeCtx()
             val prompt = if (ctx != null) "Selected code:\n\n$ctx\n\n---\nUser: $input" else input
 
             addUserMsg(input)
-            inputField.text = ""
+            inputArea.text = ""
             selectedBanner.isVisible = false
             showThinking()
 
@@ -194,32 +230,28 @@ class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
                 preferredSize = Dimension(360, preferredSize.height.coerceAtLeast(30))
             }
 
-            val styled = """
-                <html><head><style>
-                body { font-family: -apple-system, 'Segoe UI', sans-serif; font-size: 13px; margin: 0; padding: 0; }
-                p { margin: 4px 0; }
-                pre { background: #263238; color: #EEFFFF; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
-                code { background: #ECEFF1; color: #C62828; padding: 1px 4px; border-radius: 2px; font-size: 12px; }
-                pre code { background: transparent; color: #EEFFFF; padding: 0; }
-                h1,h2,h3 { margin: 8px 0 4px 0; }
-                ul,ol { margin: 4px 0; padding-left: 20px; }
-                li { margin: 2px 0; }
-            </style></head><body>${
-                pane.text
-                    .replace("<html>", "").replace("</html>", "")
-                    .replace("<head>", "").replace("</head>", "")
-                    .replace("<body>", "").replace("</body>", "")
-            }</body></html>
-            """.trimIndent()
-            pane.text = styled
+            val inner = pane.text
+                .replace("<html>", "").replace("</html>", "")
+                .replace("<head>", "").replace("</head>", "")
+                .replace("<body>", "").replace("</body>", "")
 
-            val outer = object : JPanel(FlowLayout(if (user) FlowLayout.RIGHT else FlowLayout.LEFT)) {
-                override fun getMaximumSize() = Dimension(Int.MAX_VALUE, preferredSize.height)
+            pane.text = """<html><head><style>
+                body { font-family:-apple-system,'Segoe UI',sans-serif; font-size:13px; margin:0; padding:0; }
+                p { margin:4px 0; }
+                pre { background:#263238; color:#EEFFFF; padding:10px; border-radius:4px; overflow-x:auto; font-size:12px; }
+                code { background:#ECEFF1; color:#C62828; padding:1px 4px; border-radius:2px; font-size:12px; }
+                pre code { background:transparent; color:#EEFFFF; padding:0; }
+                h1,h2,h3 { margin:8px 0 4px 0; }
+                ul,ol { margin:4px 0; padding-left:20px; }
+                li { margin:2px 0; }
+            </style></head><body>$inner</body></html>"""
+
+            val outer = JPanel(FlowLayout(if (user) FlowLayout.RIGHT else FlowLayout.LEFT)).apply {
+                isOpaque = false
+                maximumSize = Dimension(Int.MAX_VALUE, preferredSize.height)
+                border = EmptyBorder(6, 10, 6, 10)
             }
-            outer.isOpaque = false
-            outer.border = EmptyBorder(6, 10, 6, 10)
             outer.add(pane)
-
             messageContainer.add(outer)
             scrollDown()
         }
@@ -227,7 +259,6 @@ class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
         private fun showThinking() {
             thinking = true
             sendButton.isEnabled = false
-            val p = JPanel(FlowLayout(FlowLayout.LEFT)).apply { isOpaque = false }
             val l = JLabel("Thinking").apply {
                 font = Font(name, Font.ITALIC, 12)
                 foreground = Color(0x9E9E9E)
@@ -236,9 +267,8 @@ class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
                     EmptyBorder(8, 14, 8, 14)
                 )
             }
-            p.add(l)
-            thinkingPanel = p
-            messageContainer.add(p)
+            thinkingPanel = JPanel(FlowLayout(FlowLayout.LEFT)).apply { isOpaque = false; add(l) }
+            messageContainer.add(thinkingPanel)
             scrollDown()
         }
 
@@ -246,7 +276,7 @@ class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
             thinking = false
             thinkingPanel?.let { messageContainer.remove(it); messageContainer.revalidate(); messageContainer.repaint() }
             thinkingPanel = null
-            sendButton.isEnabled = inputField.text.isNotBlank()
+            sendButton.isEnabled = inputArea.text.isNotBlank()
         }
 
         private fun scrollDown() {
@@ -263,7 +293,6 @@ class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
             h = h.replace(Regex("`([^`]+)`")) { "<code>${it.groupValues[1]}</code>" }
             h = h.replace(Regex("\\*\\*(.+?)\\*\\*")) { "<b>${it.groupValues[1]}</b>" }
             h = h.replace(Regex("\\*(.+?)\\*")) { "<i>${it.groupValues[1]}</i>" }
-            h = h.replace(Regex("\\[(.+?)\\]\\((.+?)\\)")) { "<a href='${it.groupValues[2]}'>${it.groupValues[1]}</a>" }
             h = h.replace(Regex("(?m)^### (.+)$")) { "<h3>${it.groupValues[1]}</h3>" }
             h = h.replace(Regex("(?m)^## (.+)$")) { "<h2>${it.groupValues[1]}</h2>" }
             h = h.replace(Regex("(?m)^# (.+)$")) { "<h1>${it.groupValues[1]}</h1>" }
@@ -311,159 +340,159 @@ class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
         }
     }
 
-    // ═══════════════════════════════════════════════════════
-    //  Settings View
-    // ═══════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════
+    //  Settings
+    // ═══════════════════════════════════════════════
 
     private class SettingsView(private val onBack: () -> Unit) : JPanel(BorderLayout()) {
 
-        private val contentPanel = JPanel(CardLayout())
+        private val contentStack = JPanel(CardLayout())
         private val corePage = CorePage()
         private val aboutPage = AboutPage()
 
         init {
             // 顶部返回栏
             val top = JPanel(BorderLayout()).apply {
-                border = BorderFactory.createMatteBorder(0, 0, 1, 0, Color(0xE0E0E0))
+                border = MatteBorder(0, 0, 1, 0, Color(0xE0E0E0))
             }
-            val backBtn = JButton("← Chat").apply {
-                isOpaque = false
-                border = EmptyBorder(2, 8, 2, 8)
-                font = Font(name, Font.PLAIN, 12)
-                addActionListener { onBack() }
-            }
-            top.add(backBtn, BorderLayout.WEST)
+            top.add(JLabel("  Settings").apply { font = Font(name, Font.BOLD, 13) }, BorderLayout.WEST)
             add(top, BorderLayout.NORTH)
 
-            // 左侧图标菜单 + 右侧内容
+            // 左侧菜单 + 右侧内容
             val body = JPanel(BorderLayout())
 
-            // 左侧菜单 (icon only)
+            // 左侧图标菜单
             val menu = JPanel().apply {
                 layout = BoxLayout(this, BoxLayout.Y_AXIS)
-                border = BorderFactory.createMatteBorder(0, 0, 0, 1, Color(0xE0E0E0))
-                background = Color(0xF5F5F5)
-                preferredSize = Dimension(44, 400)
-                maximumSize = Dimension(44, Int.MAX_VALUE)
+                border = MatteBorder(0, 0, 0, 1, Color(0xE0E0E0))
+                background = UIManager.getColor("Panel.background")
+                preferredSize = Dimension(42, 1)
             }
 
-            val coreBtn = menuIcon("🔌", "Core Config / 核心配置", active = true) {
-                (contentPanel.layout as CardLayout).show(contentPanel, "core")
-                // highlight active
-            }
-            val aboutBtn = menuIcon("ℹ", "About / 关于") {
-                (contentPanel.layout as CardLayout).show(contentPanel, "about")
-            }
-            menu.add(Box.createVerticalStrut(12))
-            menu.add(coreBtn)
-            menu.add(aboutBtn)
+            menu.add(Box.createVerticalStrut(8))
+            menu.add(menuIcon("🔌", "Core") { showPage("core") })
+            menu.add(Box.createVerticalStrut(2))
+            menu.add(menuIcon("\u2139", "About") { showPage("about") })
             menu.add(Box.createVerticalGlue())
 
             body.add(menu, BorderLayout.WEST)
 
-            // 右侧内容
-            contentPanel.add(corePage, "core")
-            contentPanel.add(aboutPage, "about")
-            (contentPanel.layout as CardLayout).show(contentPanel, "core")
-            body.add(contentPanel, BorderLayout.CENTER)
+            contentStack.add(corePage, "core")
+            contentStack.add(aboutPage, "about")
+            body.add(contentStack, BorderLayout.CENTER)
 
             add(body, BorderLayout.CENTER)
         }
 
-        private fun menuIcon(emoji: String, tooltip: String, active: Boolean = false, action: () -> Unit): JButton {
+        private fun showPage(name: String) {
+            (contentStack.layout as CardLayout).show(contentStack, name)
+        }
+
+        private fun menuIcon(emoji: String, tip: String, action: () -> Unit): JButton {
             return JButton(emoji).apply {
-                font = Font(name, Font.PLAIN, 16)
-                isOpaque = true
-                isContentAreaFilled = true
-                background = if (active) Color(0xE3F2FD) else Color(0xF5F5F5)
+                toolTipText = tip
+                font = Font(name, Font.PLAIN, 15)
+                isOpaque = false
+                isContentAreaFilled = false
                 border = EmptyBorder(10, 0, 10, 0)
+                maximumSize = Dimension(42, 40)
                 alignmentX = Component.CENTER_ALIGNMENT
-                maximumSize = Dimension(44, 44)
-                toolTipText = tooltip
+                cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
                 addActionListener { action() }
             }
         }
     }
 
-    // ═══════════════════════════════════════════════════════
-    //  Core Config Page
-    // ═══════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════
+    //  Core page
+    // ═══════════════════════════════════════════════
 
     private class CorePage : JPanel(BorderLayout()) {
 
         private val runner = SetupRunner()
-        private val title = JLabel()
-        private val status = JLabel()
+        private val statusIcon = JLabel()
+        private val statusText = JLabel()
         private val installBtn = JButton()
         private val terminal = JTextArea()
         private var installed = false
 
         init {
-            border = EmptyBorder(20, 24, 16, 24)
+            border = EmptyBorder(24, 24, 16, 24)
 
             val box = JPanel().apply { layout = BoxLayout(this, BoxLayout.Y_AXIS) }
 
-            title.apply {
+            // 标题
+            val title = JLabel("RX Core").apply {
                 font = Font(name, Font.BOLD, 18)
-                text = "RX Core"
                 alignmentX = Component.LEFT_ALIGNMENT
             }
             box.add(title)
-            box.add(Box.createVerticalStrut(12))
-
-            status.apply {
-                font = Font(name, Font.PLAIN, 13)
-                text = "Checking..."
-                alignmentX = Component.LEFT_ALIGNMENT
-            }
-            box.add(status)
             box.add(Box.createVerticalStrut(16))
 
+            // 状态行
+            val statusRow = JPanel(FlowLayout(FlowLayout.LEFT, 8, 0)).apply {
+                alignmentX = Component.LEFT_ALIGNMENT
+            }
+            statusIcon.font = Font(name, Font.PLAIN, 14)
+            statusText.font = Font(name, Font.PLAIN, 13)
+            statusRow.add(statusIcon)
+            statusRow.add(statusText)
+            box.add(statusRow)
+            box.add(Box.createVerticalStrut(14))
+
+            // 安装按钮
             installBtn.apply {
                 font = Font(name, Font.PLAIN, 13)
                 isVisible = false
                 alignmentX = Component.LEFT_ALIGNMENT
-                maximumSize = Dimension(200, 36)
+                maximumSize = Dimension(220, 34)
                 addActionListener { doInstall() }
             }
             box.add(installBtn)
             box.add(Box.createVerticalStrut(20))
 
+            // 终端输出
             terminal.apply {
                 isEditable = false
                 font = Font("Monospaced", Font.PLAIN, 11)
                 background = Color(0x263238)
                 foreground = Color(0xEEFFFF)
                 alignmentX = Component.LEFT_ALIGNMENT
-                maximumSize = Dimension(Int.MAX_VALUE, 200)
-                text = ""
             }
-            val scroll = JScrollPane(terminal).apply {
+            val termScroll = JScrollPane(terminal).apply {
                 verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
+                preferredSize = Dimension(300, 180)
+                maximumSize = Dimension(Int.MAX_VALUE, 250)
                 alignmentX = Component.LEFT_ALIGNMENT
-                maximumSize = Dimension(Int.MAX_VALUE, 200)
             }
-            box.add(scroll)
+            box.add(termScroll)
 
-            add(box, BorderLayout.NORTH)
-            check()
+            add(box, BorderLayout.CENTER)
+            refresh()
         }
 
-        private fun check() {
+        private fun refresh() {
             Thread {
                 installed = runner.isInstalled()
-                val ver = if (installed) " — " + runner.getVersion() else ""
+                val ver = if (installed) runner.getVersion() else ""
                 SwingUtilities.invokeLater {
                     if (installed) {
-                        status.text = "✅ Reasonix is installed$ver"
-                        status.foreground = Color(0x388E3C)
-                        installBtn.isVisible = false
-                        terminal.text = "> reasonix version\n${runner.getVersion()}\n"
-                    } else {
-                        status.text = "⚠️ Reasonix CLI not installed"
-                        status.foreground = Color(0xE65100)
+                        statusIcon.text = "✅"
+                        statusText.text = "Reasonix is installed — $ver"
+                        statusText.foreground = Color(0x388E3C)
                         installBtn.text = "Install Reasonix"
                         installBtn.isVisible = true
+                        installBtn.isEnabled = false
+                        installBtn.toolTipText = "Already installed"
+                        terminal.text = "> reasonix version\n$ver\n"
+                    } else {
+                        statusIcon.text = "⚠️"
+                        statusText.text = "Reasonix CLI not installed"
+                        statusText.foreground = Color(0xE65100)
+                        installBtn.text = "Install Reasonix"
+                        installBtn.isVisible = true
+                        installBtn.isEnabled = true
+                        installBtn.toolTipText = null
                         terminal.text = ""
                     }
                 }
@@ -480,46 +509,41 @@ class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
                 SwingUtilities.invokeLater {
                     terminal.append(if (r.success) "✅ Done!\n" else "❌ ${r.output}\n")
                     terminal.append("────────────────────\n")
-                    installBtn.isEnabled = true
-                    check()
+                    refresh()
                 }
             }.start()
         }
     }
 
-    // ═══════════════════════════════════════════════════════
-    //  About Page
-    // ═══════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════
+    //  About page
+    // ═══════════════════════════════════════════════
 
     private class AboutPage : JPanel(BorderLayout()) {
 
         init {
-            border = EmptyBorder(20, 24, 16, 24)
+            border = EmptyBorder(24, 24, 16, 24)
 
             val box = JPanel().apply { layout = BoxLayout(this, BoxLayout.Y_AXIS) }
 
             box.add(JLabel("About RX GUI").apply { font = Font(name, Font.BOLD, 18) })
-            box.add(Box.createVerticalStrut(12))
+            box.add(Box.createVerticalStrut(14))
 
             val info = JEditorPane("text/html", """
                 <html><body style='font-family:-apple-system,sans-serif;font-size:13px'>
                 <p><b>RX GUI</b> v0.1.0</p>
-                <p>Reasonix AI assistant for JetBrains IDEs.</p>
-                <p>授权证 / License: MIT</p>
-
-                <p style='margin-top:12px'>Chat with Reasonix in the side panel.<br>
-                Select code to ask questions about it.</p>
-                <p style='margin-top:12px;color:#888'>https://reasonix.io</p>
+                <p style='margin-top:6px'>Reasonix AI assistant for JetBrains IDEs.</p>
+                <p style='margin-top:6px;color:#888'>https://reasonix.io</p>
+                <p style='margin-top:12px;color:#888;font-size:11px'>License: MIT</p>
                 </body></html>
             """.trimIndent()).apply {
                 isEditable = false
                 isOpaque = false
                 alignmentX = Component.LEFT_ALIGNMENT
-                preferredSize = Dimension(300, 200)
+                preferredSize = Dimension(300, 160)
             }
             box.add(info)
-
-            add(box, BorderLayout.NORTH)
+            add(box, BorderLayout.CENTER)
         }
     }
 }
