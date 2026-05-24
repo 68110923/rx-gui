@@ -14,6 +14,16 @@ repositories {
     }
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    }
+}
+
+kotlin {
+    jvmToolchain(25)
+}
+
 dependencies {
     intellijPlatform {
         create("IC", "2024.3")
