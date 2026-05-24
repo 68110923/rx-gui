@@ -186,17 +186,16 @@ function addWelcome(){
             if (input.isEmpty() || thinking) return
             val ctx = getCodeCtx()
             val prompt = if (ctx != null) "Code:\n\n$ctx\n\n---\nUser: $input" else input
-            runJs("addMessage('user', '${markdownToHtml(input).replace("'", "\\'")}')")
+            runJs("addMessage('user',${json(markdownToHtml(input))})")
             inputArea.text = ""
             selectedBanner.isVisible = false
             showThinking()
             thinking = true; sendButton.isEnabled = false
             runner.run(prompt) { result ->
-                ApplicationManager.getApplication().invokeLater {
+                SwingUtilities.invokeLater {
                     hideThinking()
                     thinking = false; sendButton.isEnabled = inputArea.text.isNotBlank()
-                    val html = markdownToHtml(result)
-                    runJs("addMessage('ai', '${html.replace("'", "\\'").replace("\\", "\\\\")}')")
+                    runJs("addMessage('ai',${json(markdownToHtml(result))})")
                 }
             }
         }
