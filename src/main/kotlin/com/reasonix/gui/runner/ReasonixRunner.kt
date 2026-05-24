@@ -2,51 +2,54 @@ package com.reasonix.gui.runner
 
 import java.io.File
 
-/**
- * 调用 Reasonix CLI。
- */
 class ReasonixRunner {
 
     companion object {
         private const val TIMEOUT_SEC = 180L
     }
 
-    /** 返回 Reasonix 可执行路径，找不到则 null */
-    private fun findReasonix(): String? {
-        // shell 登录环境
+    private fun findExe(name: String, args: String = "--version"): String? {
+        // login shell
         for (shell in listOf("/bin/zsh", "/bin/bash")) {
             try {
-                val p = ProcessBuilder(shell, "-l", "-c", "which reasonix")
+                val p = ProcessBuilder(shell, "-l", "-c", "which $name")
                     .redirectErrorStream(true).start()
                 val out = p.inputStream.bufferedReader().readText().trim()
                 if (p.waitFor() == 0 && out.isNotEmpty()) return out
             } catch (_: Exception) {}
         }
-
-        // 直接调用
-        try {
-            val p = ProcessBuilder("reasonix", "version").redirectErrorStream(true).start()
-            if (p.waitFor() == 0) return "reasonix"
-        } catch (_: Exception) {}
-
-        // 已知路径
-        for (path in listOf(
-            "/opt/homebrew/bin/reasonix",
-            "/usr/local/bin/reasonix",
-            System.getProperty("user.home") + "/.npm-global/bin/reasonix"
-        )) {
-            if (File(path).exists()) return path
+        // interactive shell (loads .zshrc for nvm/fnm)
+        for (shell in listOf("/bin/zsh", "/bin/bash")) {
+            try {
+                val p = ProcessBuilder(shell, "-i", "-c", "which $name")
+                    .redirectErrorStream(true).start()
+                val out = p.inputStream.bufferedReader().readText().trim()
+                if (p.waitFor() == 0 && out.isNotEmpty()) return out
+            } catch (_: Exception) {}
         }
-
+        // direct
+        try {
+            val p = ProcessBuilder(name, args).redirectErrorStream(true).start()
+            if (p.waitFor() == 0) return name
+        } catch (_: Exception) {}
+        // known paths
+        for (dir in listOf("/opt/homebrew/bin", "/usr/local/bin", System.getProperty("user.home") + "/.npm-global/bin")) {
+            val f = File(dir, name); if (f.exists()) return f.absolutePath
+        }
         return null
     }
 
     fun run(prompt: String, onResult: (String) -> Unit) {
         Thread {
             try {
-                val exe = findReasonix()
+                // 先检查 node
+                if (findExe("node") == null) {
+                    onResult("❌ **Node.js not found.**\n\nPlease install Node.js first: https://nodejs.org")
+                    return@Thread
+                }
+                val exe = findExe("reasonix")
                 if (exe == null) {
-                    onResult("❌ Reasonix CLI not found.\\n\\nPlease install it from the **Settings → Core** tab.")
+                    onResult("❌ **Reasonix CLI not found.**\n\nInstall: Settings → Core → Install Reasonix")
                     return@Thread
                 }
                 val result = execute(exe, prompt)
@@ -58,11 +61,9 @@ class ReasonixRunner {
     }
 
     private fun execute(exe: String, prompt: String): String {
-        val pb = if (exe.startsWith("/")) {
-            ProcessBuilder(exe, "run", prompt)
-        } else {
-            ProcessBuilder("/bin/zsh", "-l", "-c", "reasonix run '$prompt'")
-        }
+        // 用交互 shell 执行，保证 nvm/fnm 加载了 node
+        val safePrompt = prompt.replace("'", "'\\''")
+        val pb = ProcessBuilder("/bin/zsh", "-i", "-c", "reasonix run '$safePrompt'")
         pb.redirectErrorStream(true)
 
         val process = pb.start()
@@ -83,9 +84,7 @@ class ReasonixRunner {
         } finally {
             reader.close()
         }
-
         process.waitFor()
-        val result = output.toString().trim()
-        return result.ifEmpty { "(empty)" }
+        return output.toString().trim().ifEmpty { "(empty)" }
     }
 }
