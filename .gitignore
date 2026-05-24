@@ -14,3 +14,4 @@ build/
 .idea/usage.statistics.xml
 .idea/shelf/
 .idea/sonarlint/
+jdk21/

@@ -1,29 +1,36 @@
 <idea-plugin>
     <id>com.reasonix.gui</id>
-    <name>Reasonix GUI</name>
-    <vendor>Reasonix</vendor>
+    <name>RX GUI</name>
+    <vendor email="rx@reasonix.io" url="https://reasonix.io">Reasonix</vendor>
 
     <description><![CDATA[
-        Reasonix AI assistant sidebar for JetBrains IDEs.
-        Chat with Reasonix AI, ask questions about your code,
-        and get intelligent responses directly in your IDE.
+        <h3>RX GUI — Reasonix AI 助手插件</h3>
+        <p>
+        在 IDE 侧边栏与 Reasonix AI 对话，选中代码自动附带到问题中。<br>
+        支持一键安装 Reasonix CLI 和配置 API Key，装完即用。
+        </p>
 
-        Features:
-        - Sidebar chat panel
-        - Select code and ask questions about it
-        - Markdown rendering for responses
-        - Works in all JetBrains IDEs (PyCharm, IDEA, GoLand, WebStorm...)
+        <h4>功能 / Features</h4>
+        <ul>
+            <li>💬 <b>侧边栏对话</b> — 在 IDE 右侧面板中与 Reasonix 聊天 / Chat with Reasonix in the sidebar</li>
+            <li>📎 <b>选中代码提问</b> — 选中代码自动附带到问题中 / Select code to attach to questions</li>
+            <li>📝 <b>Markdown 渲染</b> — AI 回复支持代码高亮、粗体、链接 / Markdown rendering with code highlighting</li>
+            <li>🔧 <b>一键安装</b> — 在插件内安装 Reasonix CLI / Install Reasonix CLI inside the plugin</li>
+            <li>🔑 <b>API Key 配置</b> — 内置配置页，直接写入 Reasonix 配置 / Built-in API key configuration</li>
+        </ul>
+
+        <h4>兼容 / Compatibility</h4>
+        <p>通用于所有 IntelliJ 平台的 IDE：IntelliJ IDEA、PyCharm、GoLand、WebStorm 等。<br>
+        Works with all IntelliJ-based IDEs: IDEA, PyCharm, GoLand, WebStorm, etc.</p>
     ]]></description>
 
-    <!-- 只依赖 platform，兼容所有 JetBrains IDE，不要求 Java 模块 -->
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <!-- 注册侧边栏 ToolWindow -->
         <toolWindow
-            id="Reasonix"
+            id="RX GUI"
             anchor="right"
             factoryClass="com.reasonix.gui.toolwindow.RxToolWindowFactory"
-            icon="/icons/toolWindowIcon.svg"/>
+            icon="icons/toolWindowIcon.svg"/>
     </extensions>
 </idea-plugin>

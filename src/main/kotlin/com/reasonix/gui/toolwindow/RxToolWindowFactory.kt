@@ -1,4 +1,4 @@
-package com.reasonix.gui
+package com.reasonix.gui.toolwindow
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
