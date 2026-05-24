@@ -1,6 +1,6 @@
 plugins {
-    id("org.jetbrains.intellij") version "1.17.4"
-    kotlin("jvm") version "1.9.22"
+    id("org.jetbrains.intellij.platform") version "2.16.0"
+    kotlin("jvm") version "2.1.0"
 }
 
 group = "com.reasonix.gui"
@@ -8,17 +8,25 @@ version = "0.1.0"
 
 repositories {
     mavenCentral()
+
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
-intellij {
-    version.set("2023.2")
-    type.set("IC")                   // Community Edition, 兼容所有 JetBrains IDE
-    plugins.set(listOf("com.intellij.modules.platform"))
+dependencies {
+    intellijPlatform {
+        create("IC", "2024.3")
+        bundledPlugin("com.intellij.modules.platform")
+    }
 }
 
-tasks {
-    patchPluginXml {
-        sinceBuild.set("232")        // 2023.2
-        untilBuild.set("")           // 不限上限
+intellijPlatform {
+    pluginConfiguration {
+        name = "Reasonix GUI"
+        ideaVersion {
+            sinceBuild = "243"
+            untilBuild = ""
+        }
     }
 }
