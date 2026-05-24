@@ -94,14 +94,14 @@ function clearMessages(){
   document.getElementById('messages').innerHTML='';
 }
 function addWelcome(){
-  clearMessages();
+  if(document.getElementById('messages').children.length>0) return;
   addMessage('ai','<h2>👋 Welcome to RX GUI</h2><p>Select code, type a question, press <b>Enter</b>.<br>Click ⚙ to configure.</p>');
 }
 </script>
 </head>
 <body>
 <div id="banner"></div>
-<div id="messages"></div>
+<div id="messages"><div class="bubble ai"><h2>👋 Welcome to RX GUI</h2><p>Select code, type a question, press <b>Enter</b>.<br>Click ⚙ to configure.</p><div class="time">--:--</div></div></div>
 </body>
 </html>""".trimIndent()
     }
