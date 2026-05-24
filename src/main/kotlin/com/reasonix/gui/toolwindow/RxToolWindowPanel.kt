@@ -368,15 +368,6 @@ class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
         private val statusLabel = JLabel()
         private val installBtn = JButton()
         private val terminal = JTextArea()
-        private var installed = false
-
-        companion object {
-            private val KNOWN_PATHS = listOf(
-                "/opt/homebrew/bin/reasonix",
-                "/usr/local/bin/reasonix",
-                System.getProperty("user.home") + "/.npm-global/bin/reasonix"
-            )
-        }
 
         init {
             border = EmptyBorder(24, 24, 16, 24)
@@ -419,8 +410,8 @@ class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
 
         private fun refresh() {
             Thread {
-                val (inst, ver) = detect()
-                installed = inst
+                val installed = runner.isInstalled()
+                val ver = runner.getVersion()
                 SwingUtilities.invokeLater {
                     if (installed) {
                         statusLabel.text = "✅ Reasonix is installed — $ver"
@@ -437,36 +428,6 @@ class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
                     }
                 }
             }.start()
-        }
-
-        private fun detect(): Pair<Boolean, String> {
-            // Try 'reasonix version'
-            try {
-                val p = ProcessBuilder("reasonix", "version").redirectErrorStream(true).start()
-                val out = p.inputStream.bufferedReader().readText().trim()
-                if (p.waitFor() == 0 && out.isNotEmpty()) return true to out
-            } catch (_: Exception) {}
-
-            // Try known paths
-            for (path in KNOWN_PATHS) {
-                try {
-                    val f = File(path)
-                    if (f.exists()) {
-                        val p = ProcessBuilder(path, "version").redirectErrorStream(true).start()
-                        val out = p.inputStream.bufferedReader().readText().trim()
-                        if (p.waitFor() == 0) return true to "$path\n$out"
-                    }
-                } catch (_: Exception) {}
-            }
-
-            // Try npx
-            try {
-                val p = ProcessBuilder("npx", "reasonix", "version").redirectErrorStream(true).start()
-                val out = p.inputStream.bufferedReader().readText().trim()
-                if (p.waitFor() == 0 && out.isNotEmpty()) return true to "(via npx)\n$out"
-            } catch (_: Exception) {}
-
-            return false to ""
         }
 
         private fun doInstall() {
