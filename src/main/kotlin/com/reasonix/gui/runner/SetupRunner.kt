@@ -1,43 +1,36 @@
 package com.reasonix.gui.runner
 
 /**
- * 处理 Reasonix CLI 的安装和配置。
- * 所有操作在后台线程中执行，通过回调返回结果。
+ * 处理 Reasonix CLI 的安装和版本检查。
  */
 class SetupRunner {
 
     data class CommandResult(val success: Boolean, val output: String)
 
-    // ── 公共 API ──
-
-    /** 检查 Reasonix 是否已安装 */
     fun isInstalled(): Boolean {
         return try {
             val process = ProcessBuilder("reasonix", "version")
                 .redirectErrorStream(true)
                 .start()
-            val exitCode = process.waitFor()
-            exitCode == 0
+            process.waitFor() == 0
         } catch (e: Exception) {
             false
         }
     }
 
-    /** 检查 API Key 是否已配置 */
-    fun hasApiKey(): Boolean {
+    fun getVersion(): String {
         return try {
-            val process = ProcessBuilder("reasonix", "config", "get", "reasonix.apiKey")
+            val process = ProcessBuilder("reasonix", "version")
                 .redirectErrorStream(true)
                 .start()
-            val output = process.inputStream.bufferedReader().readText().trim()
+            val out = process.inputStream.bufferedReader().readText().trim()
             process.waitFor()
-            output.isNotEmpty() && output != "null" && output.length > 5
+            out
         } catch (e: Exception) {
-            false
+            ""
         }
     }
 
-    /** 安装 Reasonix (npm install -g reasonix) */
     fun install(onLine: (String) -> Unit): CommandResult {
         return try {
             val process = ProcessBuilder("npm", "install", "-g", "reasonix")
@@ -59,20 +52,6 @@ class SetupRunner {
             val msg = "Error: ${e.message}"
             onLine(msg)
             CommandResult(false, msg)
-        }
-    }
-
-    /** 设置 API Key */
-    fun setApiKey(key: String): CommandResult {
-        return try {
-            val process = ProcessBuilder("reasonix", "config", "set", "reasonix.apiKey", key)
-                .redirectErrorStream(true)
-                .start()
-            val output = process.inputStream.bufferedReader().readText().trim()
-            val exitCode = process.waitFor()
-            CommandResult(exitCode == 0, output)
-        } catch (e: Exception) {
-            CommandResult(false, "Error: ${e.message}")
         }
     }
 }
