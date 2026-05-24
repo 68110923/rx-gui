@@ -204,12 +204,10 @@ class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
             val inner = pane.text.replace("<html>", "").replace("</html>", "")
                 .replace("<head>", "").replace("</head>", "").replace("<body>", "").replace("</body>", "")
             pane.text = """<html><head><style>
-                body{font-family:-apple-system,sans-serif;font-size:13px;margin:0;padding:0}
-                p{margin:4px 0}pre{background:#263238;color:#EEFFFF;padding:10px;border-radius:4px;font-size:12px}
-                code{background:#ECEFF1;color:#C62828;padding:1px 4px;border-radius:2px;font-size:12px}
+                pre{background:#263238;color:#EEFFFF;padding:10px;font-size:12px}
+                code{background:#ECEFF1;color:#C62828;padding:1px 4px;font-size:12px}
                 pre code{background:transparent;color:#EEFFFF;padding:0}
-                h1,h2,h3{margin:8px 0 4px 0}ul,ol{margin:4px 0;padding-left:20px}li{margin:2px 0}
-            </style></head><body>$inner</body></html>"""
+            </style></head><body style='font-size:13px;margin:0;padding:0'>$inner</body></html>"""
 
             val outer = object : JPanel(FlowLayout(if (user) FlowLayout.RIGHT else FlowLayout.LEFT)) {
                 override fun getMaximumSize() = Dimension(Int.MAX_VALUE, preferredSize.height)
