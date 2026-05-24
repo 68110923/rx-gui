@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 13 13">
+  <!-- 侧边栏长条图标 (13x13) -->
+  <rect width="13" height="13" rx="3" fill="#4F46E5"/>
+  <path d="M3 6C3 5 3.8 4 4.5 4H8.5C9.2 4 10 5 10 6V8C10 9 9.2 10 8.5 10H7.5L6 11V10H4.5C3.8 10 3 9 3 8V6Z" fill="white" opacity="0.85"/>
+  <text x="6.5" y="8.5" text-anchor="middle" font-family="Arial" font-size="4.5" font-weight="bold" fill="#4F46E5">Rx</text>
+</svg>

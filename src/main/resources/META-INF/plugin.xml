@@ -1,0 +1,29 @@
+<idea-plugin>
+    <id>com.reasonix.gui</id>
+    <name>Reasonix GUI</name>
+    <vendor>Reasonix</vendor>
+
+    <description><![CDATA[
+        Reasonix AI assistant sidebar for JetBrains IDEs.
+        Chat with Reasonix AI, ask questions about your code,
+        and get intelligent responses directly in your IDE.
+
+        Features:
+        - Sidebar chat panel
+        - Select code and ask questions about it
+        - Markdown rendering for responses
+        - Works in all JetBrains IDEs (PyCharm, IDEA, GoLand, WebStorm...)
+    ]]></description>
+
+    <!-- 只依赖 platform，兼容所有 JetBrains IDE，不要求 Java 模块 -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- 注册侧边栏 ToolWindow -->
+        <toolWindow
+            id="Reasonix"
+            anchor="right"
+            factoryClass="com.reasonix.gui.toolwindow.RxToolWindowFactory"
+            icon="/icons/toolWindowIcon.svg"/>
+    </extensions>
+</idea-plugin>
