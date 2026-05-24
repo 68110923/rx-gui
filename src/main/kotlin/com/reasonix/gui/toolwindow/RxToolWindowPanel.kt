@@ -112,7 +112,7 @@ function addWelcome(){
 
     private inner class ChatView : JPanel(BorderLayout()) {
 
-        private val browser = JBCefBrowser(BASE_HTML)
+        private val browser = JBCefBrowser()
         private val inputArea = JTextArea(3, 20)
         private val sendButton = JButton("Send")
         private val selectedBanner = JLabel()
@@ -120,9 +120,11 @@ function addWelcome(){
         private val runner = ReasonixRunner()
 
         init {
+            browser.loadHTML(BASE_HTML)
             buildUI()
             bindActions()
-            addWelcome()
+            // 等浏览器加载完再渲染欢迎消息
+            javax.swing.Timer(800) { runJs("addWelcome()") }.apply { isRepeats = false }.start()
         }
 
         private fun buildUI() {
