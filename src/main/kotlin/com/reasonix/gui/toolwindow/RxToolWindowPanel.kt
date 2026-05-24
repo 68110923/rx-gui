@@ -194,12 +194,17 @@ class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
             val pane = JEditorPane("text/html", html).apply {
                 isEditable = false; isOpaque = true
                 putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true)
-                background = if (user) Color(0xE3F2FD) else Color(0xF5F5F5)
+                val bg = if (user) Color(0xE3F2FD) else Color(0xF5F5F5)
+                background = bg
+                // 模拟圆角：外边框色=背景色
                 border = BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(if (user) Color(0x90CAF9) else Color(0xE0E0E0), 1),
-                    EmptyBorder(8, 12, 8, 12)
+                    BorderFactory.createLineBorder(Color(0, true), 4),
+                    BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(bg, 4),
+                        EmptyBorder(6, 10, 6, 10)
+                    )
                 )
-                preferredSize = Dimension(360, preferredSize.height.coerceAtLeast(30))
+                preferredSize = Dimension(360, preferredSize.height.coerceAtLeast(28))
             }
             val inner = pane.text.replace("<html>", "").replace("</html>", "")
                 .replace("<head>", "").replace("</head>", "").replace("<body>", "").replace("</body>", "")
@@ -212,7 +217,7 @@ class RxToolWindowPanel(private val project: Project) : JPanel(BorderLayout()) {
             val outer = object : JPanel(FlowLayout(if (user) FlowLayout.RIGHT else FlowLayout.LEFT)) {
                 override fun getMaximumSize() = Dimension(Int.MAX_VALUE, preferredSize.height)
             }
-            outer.isOpaque = false; outer.border = EmptyBorder(6, 10, 6, 10)
+            outer.isOpaque = false; outer.border = EmptyBorder(4, 8, 4, 8)
             outer.add(pane)
             messageContainer.add(outer)
             messageContainer.revalidate()
