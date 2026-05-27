@@ -4,31 +4,34 @@ plugins {
 }
 
 group = "com.reasonix.gui"
-version = "0.1.0"
+version = "0.2.0"
 
 repositories {
     mavenCentral()
-
-    intellijPlatform {
-        defaultRepositories()
-    }
+    intellijPlatform { defaultRepositories() }
 }
 
 dependencies {
     intellijPlatform {
-        create("IC", "2024.3")
+        create("PY", "2024.3")
         bundledPlugin("com.intellij.modules.platform")
     }
+    implementation("com.google.code.gson:gson:2.11.0")
 }
 
 intellijPlatform {
     instrumentCode = false
-
     pluginConfiguration {
         name = "RX GUI"
         ideaVersion {
             sinceBuild = "243"
             untilBuild = ""
         }
+    }
+}
+
+tasks {
+    runIde {
+        systemProperty("rx-gui.dev-resources", project.projectDir.resolve("src/main/resources").absolutePath)
     }
 }

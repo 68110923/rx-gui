@@ -1,27 +1,27 @@
 <idea-plugin>
     <id>com.reasonix.gui</id>
     <name>RX GUI</name>
+    <version>0.2.0</version>
     <vendor email="rx@reasonix.io" url="https://reasonix.io">Reasonix</vendor>
-    <icon>/icons/pluginIcon.svg</icon>
+
+    <icon>icons/pluginIcon.svg</icon>
 
     <description><![CDATA[
-        <h3>RX GUI — Reasonix AI 助手插件 / AI Assistant Plugin</h3>
-        <p>
-        在 IDE 侧边栏与 Reasonix AI 对话，选中代码自动附带到问题中。<br>
-        Chat with Reasonix AI in the sidebar. Selected code is attached automatically.
-        </p>
-
-        <h4>功能 / Features</h4>
+        <h3>RX GUI — Reasonix AI 编程助手</h3>
+        <p>在 IDE 侧边栏中直接与 Reasonix AI 对话，支持流式响应、代码高亮和完整编程智能体能力。基于 ACP 协议，适配 DeepSeek V4 系列模型。</p>
+        <h4>功能特点</h4>
         <ul>
-            <li>💬 <b>侧边栏对话</b> — 在 IDE 右侧面板中与 Reasonix 聊天 / Chat with Reasonix in the sidebar</li>
-            <li>📎 <b>选中代码提问</b> — 选中代码自动附带到问题中 / Select code to attach to questions</li>
-            <li>📝 <b>Markdown 渲染</b> — AI 回复支持代码高亮、粗体、链接 / Markdown rendering with code highlighting</li>
-            <li>🔧 <b>一键安装</b> — 插件内安装 Reasonix CLI / One-click Reasonix CLI install</li>
+            <li>流式 AI 对话，实时 Markdown 渲染与代码语法高亮</li>
+            <li>审查模式：文件编辑交互式 Diff 审阅（接受 / 拒绝）</li>
+            <li>模式 / 模型 / 预设 / 推理深度一键切换</li>
+            <li>斜杠命令自动补全（/model、/mode、/effort 等）</li>
+            <li>消费金额 & 余额实时显示</li>
+            <li>上下文使用量 & 缓存命中率展示</li>
+            <li>编辑器选中代码自动附带为上下文</li>
+            <li>跨平台支持（macOS / Windows / Linux）</li>
         </ul>
-
-        <h4>兼容 / Compatibility</h4>
-        <p>所有 IntelliJ 平台 IDE：IntelliJ IDEA、PyCharm、GoLand、WebStorm 等。<br>
-        All IntelliJ-based IDEs: IDEA, PyCharm, GoLand, WebStorm, etc.</p>
+        <h4>环境要求</h4>
+        <p>Node.js >= 22 以及全局安装的 Reasonix CLI (<code>npm install -g reasonix</code>)。需要 DeepSeek API Key (<code>reasonix setup</code>)。</p>
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
@@ -30,7 +30,7 @@
         <toolWindow
             id="RX GUI"
             anchor="right"
-            factoryClass="com.reasonix.gui.toolwindow.RxToolWindowFactory"
+            factoryClass="com.reasonix.gui.ui.RxToolWindowFactory"
             icon="icons/toolWindowIcon.svg"/>
     </extensions>
 </idea-plugin>

@@ -4,6 +4,7 @@
 # Gradle
 .gradle/
 build/
+!build/distributions/
 
 # IntelliJ Platform SDK 下载缓存
 .intellijPlatform/

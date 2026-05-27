@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* ═══════════════ Variables ═══════════════ */
+:root {
+  --bg: #f8f9fa; --bg2: #ffffff; --bg3: #e9ecef; --text: #212529; --text2: #495057;
+  --text3: #868e96; --border: #dee2e6; --user-bg: #e3f2fd; --ai-bg: #ffffff;
+  --accent: #1976d2; --accent2: #bbdefb; --thinking-bg: #f5f5f5;
+  --tool-bg: #f8f9fa; --tool-border: #e0e0e0; --code-bg: #263238; --code-text: #eeffff;
+  --err-bg: #fce4ec; --err-text: #c62828; --shadow: 0 1px 3px rgba(0,0,0,.06);
+  --input-bg: #ffffff; --input-border: #d0d0d0; --input-focus: #1976d2;
+  --dropdown-bg: #ffffff; --dropdown-border: #d0d0d0; --dropdown-hover: #f5f5f5;
+  --button-hover: rgba(0,0,0,.06); --context-bar-bg: #f0f0f0;
+  --status-bar-bg: #e8e8e8; --mode-review: #8e44ad; --mode-auto: #e67e22;
+  --mode-yolo: #e74c3c;
+  --token-ok: #27ae60; --token-warn: #e67e22; --token-alert: #e74c3c;
+  --mode-review-bg: #f4ecf7; --mode-auto-bg: #fef5e7; --mode-yolo-bg: #fdedec;
+}
+:root[data-theme="dark"] {
+  --bg: #1e1e1e; --bg2: #252526; --bg3: #2d2d2d; --text: #cccccc; --text2: #999999;
+  --text3: #666666; --border: #3e3e42; --user-bg: #094771; --ai-bg: #252526;
+  --accent: #007acc; --accent2: #094771; --thinking-bg: #2d2d2d;
+  --tool-bg: #252526; --tool-border: #3e3e42; --code-bg: #1e1e1e; --code-text: #d4d4d4;
+  --err-bg: #5a1d1d; --err-text: #f48771; --shadow: 0 1px 3px rgba(0,0,0,.3);
+  --input-bg: #3c3c3c; --input-border: #3e3e42; --input-focus: #007acc;
+  --dropdown-bg: #252526; --dropdown-border: #454545; --dropdown-hover: #2a2d2e;
+  --button-hover: rgba(255,255,255,.08); --context-bar-bg: #2f2f2f;
+  --status-bar-bg: #333333; --mode-review-bg: #2d1a3d; --mode-auto-bg: #3d2e1a;
+  --mode-yolo-bg: #3d1a1a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1e1e1e; --bg2: #252526; --bg3: #2d2d2d; --text: #cccccc; --text2: #999999;
+    --text3: #666666; --border: #3e3e42; --user-bg: #094771; --ai-bg: #252526;
+    --accent: #007acc; --accent2: #094771; --thinking-bg: #2d2d2d;
+    --tool-bg: #252526; --tool-border: #3e3e42; --code-bg: #1e1e1e; --code-text: #d4d4d4;
+    --err-bg: #5a1d1d; --err-text: #f48771; --shadow: 0 1px 3px rgba(0,0,0,.3);
+    --input-bg: #3c3c3c; --input-border: #3e3e42; --input-focus: #007acc;
+    --dropdown-bg: #252526; --dropdown-border: #454545; --dropdown-hover: #2a2d2e;
+    --button-hover: rgba(255,255,255,.08); --context-bar-bg: #2f2f2f;
+    --status-bar-bg: #333333; --mode-review-bg: #2d1a3d; --mode-auto-bg: #3d2e1a;
+    --mode-yolo-bg: #3d1a1a;
+  }
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { height:100%; background:var(--bg); font:13px/1.5 -apple-system,'Segoe UI','Helvetica Neue',sans-serif; color:var(--text); overflow:hidden; }
+
+/* ═══════════════ Layout ═══════════════ */
+#app { display:flex; flex-direction:column; height:100%; }
+#messages { flex:1; overflow-y:auto; padding:12px 10px; display:flex; flex-direction:column; gap:6px; }
+#bottom-panel { flex-shrink:0; border-top:1px solid var(--border); background:var(--bg); }
+
+/* ═══════════════ Info Bar (above input) ═══════════════ */
+#info-bar {
+  display:flex; align-items:center; gap:10px; padding:2px 10px;
+  background:var(--bg2); font-size:10px; color:var(--text3);
+  flex-shrink:0; min-height:18px; white-space:nowrap;
+  border-bottom:1px solid var(--border);
+}
+#info-bar span { cursor:default; }
+
+/* ═══════════════ Context Bar ═══════════════ */
+#context-bar { display:none; align-items:center; gap:6px; padding:6px 10px; background:var(--context-bar-bg); min-height:32px; flex-wrap:wrap; }
+#context-bar.visible { display:flex; }
+#context-bar .ctx-chip {
+  display:flex; align-items:center; gap:4px; padding:2px 8px; background:var(--input-bg);
+  border:1px solid var(--input-border); border-radius:4px; font-size:11px; color:var(--text2);
+  max-width:280px; transition:border-color .15s;
+}
+#context-bar .ctx-chip:hover { border-color:var(--accent); }
+#context-bar .ctx-chip .ctx-icon { font-size:12px; flex-shrink:0; }
+#context-bar .ctx-chip .ctx-text { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; direction:rtl; text-align:left; }
+#context-bar .ctx-chip .ctx-close { cursor:pointer; opacity:.6; font-size:13px; margin-left:2px; }
+#context-bar .ctx-chip .ctx-close:hover { opacity:1; color:var(--text); }
+#context-bar .ctx-hint { font-size:10px; color:var(--text3); margin-left:auto; opacity:0; transition:opacity .3s; }
+#context-bar.visible .ctx-hint { opacity:1; }
+
+/* ═══════════════ Input Area ═══════════════ */
+#input-area { display:flex; flex-direction:column; position:relative; }
+#input-box {
+  width:100%; min-height:44px; max-height:200px; padding:10px 12px;
+  background:var(--input-bg); border:none; border-bottom:1px solid var(--input-border);
+  resize:none; font:13px/1.5 -apple-system,'Segoe UI',sans-serif; color:var(--text);
+  outline:none; transition:border-color .2s, height .05s;
+  overflow-y:auto; line-height:1.5;
+}
+#input-box:focus { border-bottom-color:var(--input-focus); }
+#input-box::placeholder { color:var(--text3); }
+
+/* ═══════════════ Toolbar ═══════════════ */
+#toolbar { display:flex; align-items:center; justify-content:space-between; padding:4px; background:var(--context-bar-bg); }
+#toolbar-left { display:flex; align-items:center; gap:2px; min-width:0; overflow:visible; }
+#toolbar-right { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+
+.tb-btn {
+  display:flex; align-items:center; gap:3px; padding:4px 8px;
+  background:transparent; border:none; border-radius:4px;
+  color:var(--text2); font-size:11px; font-family:inherit; cursor:pointer;
+  transition:all .15s; white-space:nowrap;
+}
+.tb-btn:hover { background:var(--button-hover); color:var(--text); }
+.tb-btn .tb-arrow { font-size:8px; opacity:.6; }
+
+.tb-btn.primary { background:var(--accent); color:#fff; padding:4px 14px; font-weight:500; }
+.tb-btn.primary:hover { opacity:.9; }
+
+.tb-divider { width:1px; height:16px; background:var(--border); margin:0 4px; }
+
+/* Mode-specific button tinting */
+.tb-btn.mode-btn.mode-review { color:var(--mode-review); }
+.tb-btn.mode-btn.mode-review:hover { background:var(--mode-review-bg); }
+.tb-btn.mode-btn.mode-auto { color:var(--mode-auto); }
+.tb-btn.mode-btn.mode-auto:hover { background:var(--mode-auto-bg); }
+.tb-btn.mode-btn.mode-yolo { color:var(--mode-yolo); }
+.tb-btn.mode-btn.mode-yolo:hover { background:var(--mode-yolo-bg); }
+.mode-icon { font-size:12px; }
+
+/* ═══════════════ Dropdown ═══════════════ */
+.dropdown-wrap { position:relative; }
+.dropdown-menu {
+  position:absolute; bottom:calc(100% + 4px); left:0; min-width:150px;
+  background:var(--dropdown-bg); border:1px solid var(--dropdown-border);
+  border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,.25);
+  padding:4px 0; z-index:100; display:none; max-height:300px; overflow-y:auto;
+}
+.dropdown-menu.open { display:block; animation:dd-fade .1s ease; }
+@keyframes dd-fade { from{opacity:0;transform:translateY(2px)} to{opacity:1;transform:none} }
+.dropdown-item {
+  display:flex; align-items:center; gap:8px; padding:6px 12px;
+  cursor:pointer; font-size:12px; color:var(--text); transition:background .1s;
+}
+.dropdown-item:hover { background:var(--dropdown-hover); }
+.dropdown-item.selected { color:var(--accent); }
+.dropdown-item .check { margin-left:auto; font-size:10px; color:var(--accent); }
+.dropdown-item .item-desc { font-size:10px; color:var(--text3); display:block; line-height:1.3; }
+.dropdown-item .item-label { display:flex; flex-direction:column; flex:1; min-width:0; }
+
+/* ═══════════════ Slash Command Autocomplete ═══════════════ */
+#cmd-autocomplete {
+  position:absolute; bottom:100%; left:4px; right:4px;
+  background:var(--dropdown-bg); border:1px solid var(--dropdown-border);
+  border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,.25);
+  padding:4px 0; z-index:1001; display:none; max-height:200px; overflow-y:auto;
+}
+#cmd-autocomplete.open { display:block; animation:dd-fade .1s ease; }
+.cmd-item {
+  display:flex; align-items:center; gap:8px; padding:6px 12px;
+  cursor:pointer; font-size:12px; color:var(--text); transition:background .1s;
+}
+.cmd-item:hover, .cmd-item.selected { background:var(--dropdown-hover); }
+.cmd-item .cmd-name { font-weight:600; color:var(--accent); font-family:monospace; }
+.cmd-item .cmd-desc { font-size:10px; color:var(--text3); flex:1; }
+.cmd-item .cmd-args { font-size:10px; color:var(--text3); font-family:monospace; opacity:.7; }
+
+/* ═══════════════ Token Indicator ═══════════════ */
+.token-indicator {
+  display:flex; align-items:center; gap:4px;
+  color:var(--text3); font-size:11px; cursor:default; position:relative;
+  padding:2px 4px; border-radius:4px; transition:background .15s;
+}
+.token-indicator:hover { background:var(--button-hover); }
+.token-ring-wrap { position:relative; display:inline-flex; }
+.token-ring-svg { transform:rotate(-90deg); }
+.token-ring-bg { fill:none; stroke:var(--border); stroke-width:1.5; }
+.token-ring-fill {
+  fill:none; stroke-width:1.5; stroke-linecap:round;
+  transition:stroke-dashoffset .4s ease, stroke .3s ease;
+}
+.token-ring-fill.low { stroke:var(--token-ok); }
+.token-ring-fill.mid { stroke:var(--token-warn); }
+.token-ring-fill.high { stroke:var(--token-alert); }
+.token-pct { font-size:10px; font-variant-numeric:tabular-nums; min-width:24px; text-align:right; }
+.token-tooltip {
+  position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%);
+  background:var(--dropdown-bg); color:var(--text); border:1px solid var(--dropdown-border);
+  border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,.3);
+  padding:6px 8px; font-size:11px; white-space:nowrap;
+  opacity:0; visibility:hidden; pointer-events:none;
+  transition:opacity .15s ease, visibility .15s ease; z-index:1002;
+}
+.token-indicator:hover .token-tooltip { opacity:1; visibility:visible; }
+
+/* ═══════════════ Messages ═══════════════ */
+.bubble { max-width:88%; padding:10px 14px; border-radius:12px; line-height:1.6; word-wrap:break-word; white-space:pre-wrap; animation:fadeUp .15s ease; box-shadow:var(--shadow); }
+@keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+.bubble.user { align-self:flex-end; background:var(--user-bg); border-bottom-right-radius:4px; color:var(--text); }
+.bubble.ai { align-self:flex-start; background:var(--ai-bg); border-bottom-left-radius:4px; color:var(--text); }
+.bubble .meta { font-size:10px; color:var(--text3); margin-top:4px; }
+.bubble .md h1,.bubble .md h2,.bubble .md h3 { font-weight:600; margin:8px 0 4px; }
+.bubble .md h1 { font-size:1.15em; } .bubble .md h2 { font-size:1.05em; }
+.bubble .md p { margin:4px 0; white-space:normal; }
+.bubble .md ul,.bubble .md ol { margin:4px 0; padding-left:20px; white-space:normal; }
+.bubble .md li { margin:2px 0; }
+.bubble .md a { color:var(--accent); }
+.bubble .md blockquote { border-left:3px solid var(--border); padding-left:10px; color:var(--text2); margin:6px 0; }
+.bubble .md pre { background:var(--code-bg); color:var(--code-text); padding:10px 12px 10px 42px; border-radius:6px; overflow-x:auto; font:12px/1.45 'SF Mono','Fira Code','Cascadia Code',monospace; margin:6px 0; white-space:pre; position:relative; }
+.bubble .md pre .lang-tag { position:absolute; left:8px; top:8px; font-size:9px; color:var(--text3); text-transform:uppercase; user-select:none; }
+.bubble .md pre .copy-btn { position:absolute; top:4px; right:4px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15); color:var(--code-text); font-size:10px; padding:3px 8px; border-radius:3px; cursor:pointer; opacity:0; transition:all .15s; font-family:inherit; }
+.bubble .md pre:hover .copy-btn { opacity:1; }
+.bubble .md pre .copy-btn:hover { background:rgba(255,255,255,.2); }
+.bubble .md pre .copy-btn.copied { background:var(--accent); border-color:var(--accent); color:#fff; }
+.bubble .md code { background:var(--bg3); color:#c62828; padding:1px 5px; border-radius:3px; font:12px/1.4 'SF Mono','Fira Code',monospace; }
+.bubble .md pre code { background:transparent; color:var(--code-text); padding:0; }
+.bubble .md hr { border:none; border-top:1px solid var(--border); margin:8px 0; }
+.bubble .md table { border-collapse:collapse; margin:6px 0; width:100%; }
+.bubble .md th,.bubble .md td { border:1px solid var(--border); padding:4px 8px; text-align:left; font-size:12px; }
+.bubble .md th { background:var(--bg3); font-weight:600; }
+.bubble.thinking { background:var(--thinking-bg); color:var(--text3); font-style:italic; }
+.bubble.thinking .dots { display:inline-block; }
+.bubble.thinking .dots span { animation:blink 1.4s infinite both; }
+.bubble.thinking .dots span:nth-child(2) { animation-delay:.2s; }
+.bubble.thinking .dots span:nth-child(3) { animation-delay:.4s; }
+@keyframes blink { 0%,80%,100%{opacity:.3} 40%{opacity:1} }
+.tool-call { max-width:88%; align-self:flex-start; border-radius:8px; border:1px solid var(--tool-border); background:var(--tool-bg); animation:fadeUp .15s ease; overflow:hidden; }
+.tool-header { padding:6px 12px; font-size:11px; font-weight:600; color:var(--text2); cursor:pointer; display:flex; align-items:center; gap:6px; user-select:none; transition:background .15s; }
+.tool-header:hover { background:var(--button-hover); }
+.tool-header .icon { font-size:10px; transition:transform .2s; }
+.tool-header.collapsed .icon { transform:rotate(-90deg); }
+.tool-body { padding:8px 12px; font-size:12px; font-family:'SF Mono','Fira Code',monospace; color:var(--text2); max-height:200px; overflow:auto; white-space:pre-wrap; border-top:1px solid var(--tool-border); }
+.tool-body.hidden { display:none; }
+.tool-status { font-weight:normal; color:var(--text3); margin-left:auto; font-size:10px; padding:2px 6px; border-radius:3px; }
+.tool-status.done { color:#4caf50; } .tool-status.fail { color:#f44336; } .tool-status.run { color:var(--accent); }
+.perm-card { max-width:88%; align-self:flex-start; border-radius:8px; border:1px solid var(--accent2); background:var(--bg2); padding:12px; animation:fadeUp .15s ease; }
+.perm-card .perm-title { font-weight:600; margin-bottom:6px; color:var(--text); }
+.perm-card .perm-desc { font-size:12px; color:var(--text2); margin-bottom:8px; }
+.perm-card .perm-btns { display:flex; gap:6px; }
+.perm-card button { padding:4px 12px; border-radius:4px; border:1px solid var(--border); background:var(--bg2); color:var(--text); cursor:pointer; font-size:11px; transition:all .15s; }
+.perm-card button:hover { background:var(--bg3); }
+.perm-card button.allow { background:var(--accent); color:#fff; border-color:var(--accent); }
+.perm-card button.allow:hover { opacity:.9; }
+.bubble.error { align-self:center; background:var(--err-bg); color:var(--err-text); font-size:12px; border:1px solid var(--err-text); max-width:90%; text-align:center; }
+
+/* ═══════════════ Welcome ═══════════════ */
+.welcome { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--text3); padding:40px 20px; }
+.welcome h2 { font-size:24px; margin-bottom:6px; color:var(--text2); letter-spacing:-.5px; }
+.welcome .hint { font-size:11px; margin-top:16px; padding:8px 14px; background:var(--bg3); border-radius:6px; }
+
+/* ═══════════════ Scroll button ═══════════════ */
+#scroll-btn {
+  position:fixed; bottom:130px; right:16px; z-index:50;
+  width:36px; height:36px; border-radius:50%; border:1px solid var(--border);
+  background:var(--bg2); color:var(--text); cursor:pointer; font-size:16px;
+  display:none; align-items:center; justify-content:center;
+  box-shadow:var(--shadow); transition:transform .15s;
+}
+#scroll-btn.visible { display:flex; }
+#scroll-btn:hover { transform:scale(1.1); }
+
+/* ═══════════════ Theme toggle ═══════════════ */
+#theme-toggle {
+  position:fixed; top:8px; right:40px; z-index:10;
+  width:28px; height:28px; border-radius:50%; border:1px solid var(--border);
+  background:var(--bg2); color:var(--text); cursor:pointer; font-size:13px;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:var(--shadow); transition:transform .15s; opacity:.5;
+}
+#theme-toggle:hover { transform:scale(1.1); opacity:1; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="messages">
+    <div class="welcome" id="welcome">
+      <h2>RX GUI</h2>
+      <p>Reasonix AI Coding Assistant</p>
+      <div class="hint">Enter to send &middot; Shift+Enter for newline &middot; Select code in editor to attach</div>
+    </div>
+  </div>
+  <div id="bottom-panel">
+    <div id="context-bar">
+      <span class="ctx-hint">Selected code will be included as context</span>
+    </div>
+    <div id="input-area">
+      <div id="cmd-autocomplete"></div>
+      <div id="info-bar">
+        <span id="info-cache" title="cache hit ratio">cache 0%</span>
+        <span id="info-ctx" title="context usage">上下文 0/1000K</span>
+        <span id="info-cost">¥0.000</span>
+      </div>
+      <textarea id="input-box" placeholder="Ask anything, or type / for commands..." rows="1"></textarea>
+      <div id="toolbar">
+        <div id="toolbar-left">
+          <!-- Mode Selector -->
+          <div class="dropdown-wrap" id="mode-dd-wrap">
+            <button class="tb-btn mode-btn mode-auto" id="mode-btn" onclick="toggleDropdown('mode-dd')">
+              <span class="mode-icon" id="mode-icon">🤖</span>
+              <span id="mode-label">Auto</span><span class="tb-arrow">▼</span>
+            </button>
+            <div class="dropdown-menu" id="mode-dd"></div>
+          </div>
+          <div class="tb-divider"></div>
+          <!-- Preset Selector -->
+          <div class="dropdown-wrap" id="preset-dd-wrap">
+            <button class="tb-btn" id="preset-btn" onclick="toggleDropdown('preset-dd')">
+              <span id="preset-icon">🎯</span>
+              <span id="preset-label">auto</span><span class="tb-arrow">▼</span>
+            </button>
+            <div class="dropdown-menu" id="preset-dd"></div>
+          </div>
+          <div class="tb-divider"></div>
+          <!-- Effort Selector -->
+          <div class="dropdown-wrap" id="effort-dd-wrap">
+            <button class="tb-btn" id="effort-btn" onclick="toggleDropdown('effort-dd')">
+              <span id="effort-icon">⚖️</span>
+              <span id="effort-label">medium</span><span class="tb-arrow">▼</span>
+            </button>
+            <div class="dropdown-menu" id="effort-dd"></div>
+          </div>
+        </div>
+        <div id="toolbar-right">
+          <button class="tb-btn" onclick="clearChat()">Clear</button>
+          <button class="tb-btn" onclick="toggleTheme()" title="Toggle theme" style="font-size:14px;padding:4px 6px">☀</button>
+          <button class="tb-btn" onclick="sendToJava('settings')" title="Reasonix Manager" style="font-size:12px;padding:4px 6px">⚙ Manage</button>
+          <button class="tb-btn primary" id="send-btn" onclick="send()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<button id="scroll-btn" onclick="scrollToBottom()" title="Scroll to bottom">↓</button>
+<script>
+// ═══════════════ State ═══════════════
+var state = {
+  streamMsg: null, streamEl: null, streamText: '',
+  thinkEl: null, thinkStream: '',
+  ctxFile: null, ctxCode: null,
+  model: 'deepseek-v4-flash', effort: 'medium', mode: 'auto', preset: 'auto',
+  thinking: false, scrollPending: false, finalized: false
+};
+
+// ═══════════════ Dropdown Config ═══════════════
+var MODES = [
+  { id:'review', label:'review', icon:'🔍', desc:'排队编辑请求，限制 Shell 命令', color:'var(--mode-review)' },
+  { id:'auto', label:'auto', icon:'🤖', desc:'自动应用编辑，限制 Shell 命令', color:'var(--mode-auto)' },
+  { id:'yolo', label:'yolo', icon:'⚡', desc:'跳过所有权限检查', color:'var(--mode-yolo)' },
+];
+var MODE_MAP = {}; MODES.forEach(function(m){ MODE_MAP[m.id]=m; });
+var PRESET_OPTS = [
+  {label:'auto', value:'auto', desc:'自动选择最佳模型', icon:'🎯'},
+  {label:'flash', value:'flash', desc:'快速模型 (V4 Flash)', icon:'⚡'},
+  {label:'pro', value:'pro', desc:'专业模型 (V4 Pro)', icon:'💎'}
+];
+var EFFORT_OPTS = [
+  {label:'low', value:'low', desc:'快速响应，最少推理', icon:'🏃'},
+  {label:'medium', value:'medium', desc:'平衡推理与速度', icon:'⚖️'},
+  {label:'high', value:'high', desc:'深度推理处理复杂任务', icon:'🧠'},
+  {label:'max', value:'max', desc:'最强推理深度', icon:'🚀'}
+];
+
+// ═══════════════ Slash Commands ═══════════════
+var COMMANDS = [
+  { name:'model',  desc:'切换 AI 模型',           args:'<model>',  values:['deepseek-v4-flash','deepseek-v4-pro'] },
+  { name:'mode',   desc:'切换编辑模式',           args:'<mode>',  values:['review','auto','yolo'] },
+  { name:'preset', desc:'切换预设',              args:'<name>',  values:['auto','flash','pro'] },
+  { name:'effort', desc:'设置推理深度',       args:'<level>', values:['low','medium','high','max'] },
+  { name:'clear',  desc:'清空对话，开始新会话', args:'' },
+  { name:'help',   desc:'显示可用命令',     args:'' },
+  { name:'setup',  desc:'运行交互式设置',       args:'' },
+  { name:'doctor', desc:'运行系统诊断',      args:'' },
+  { name:'update', desc:'更新 Reasonix CLI',         args:'' },
+];
+var cmdState = { open:false, filtered:[], selectedIdx:0 };
+function openCmdAutocomplete() {
+  var input = $('input-box').value;
+  if (!input.startsWith('/')) { closeCmdAutocomplete(); return; }
+  var partial = input.slice(1);
+  cmdState.filtered = COMMANDS.filter(function(c) { return c.name.indexOf(partial) === 0; });
+  cmdState.selectedIdx = 0;
+  renderCmdAutocomplete();
+  if (cmdState.filtered.length > 0) {
+    cmdState.open = true;
+    $('cmd-autocomplete').classList.add('open');
+  } else {
+    closeCmdAutocomplete();
+  }
+}
+function closeCmdAutocomplete() {
+  cmdState.open = false;
+  $('cmd-autocomplete').classList.remove('open');
+}
+function renderCmdAutocomplete() {
+  var dd = $('cmd-autocomplete');
+  dd.innerHTML = '';
+  cmdState.filtered.forEach(function(cmd, i) {
+    var item = document.createElement('div');
+    item.className = 'cmd-item' + (i === cmdState.selectedIdx ? ' selected' : '');
+    item.innerHTML = '<span class="cmd-name">/' + cmd.name + '</span><span class="cmd-desc">' + cmd.desc + '</span>' + (cmd.args ? '<span class="cmd-args">' + cmd.args + '</span>' : '');
+    item.onclick = function() { selectCmdItem(cmd); };
+    item.onmouseenter = function() { cmdState.selectedIdx = i; renderCmdAutocomplete(); };
+    dd.appendChild(item);
+  });
+}
+function selectCmdItem(cmd) {
+  if (cmd.values) {
+    $('input-box').value = '/' + cmd.name + ' ';
+  } else {
+    $('input-box').value = '/' + cmd.name;
+    send();
+    return;
+  }
+  closeCmdAutocomplete();
+  autoResize();
+  $('input-box').focus();
+}
+
+// ═══════════════ Helpers ═══════════════
+function $(id) { return document.getElementById(id); }
+function el(tag, cls, html) {
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (html !== undefined) e.innerHTML = html;
+  return e;
+}
+function meta() { return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
+function scroll() {
+  if (!state.scrollPending) {
+    state.scrollPending = true;
+    requestAnimationFrame(function() {
+      var msgs = $('messages');
+      msgs.scrollTop = msgs.scrollHeight;
+      state.scrollPending = false;
+      updateScrollBtn();
+    });
+  }
+}
+function hideWelcome() { var w = $('welcome'); if (w) w.remove(); }
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ═══════════════ Theme ═══════════════
+(function(){ var t=localStorage.getItem('rx-theme'); if(t)document.documentElement.setAttribute('data-theme',t); })();
+function toggleTheme() {
+  var cur = document.documentElement.getAttribute('data-theme');
+  var next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('rx-theme', next);
+}
+
+// ═══════════════ Scroll button ═══════════════
+$('messages').addEventListener('scroll', updateScrollBtn);
+function updateScrollBtn() {
+  var msgs = $('messages');
+  var atBottom = msgs.scrollHeight - msgs.scrollTop - msgs.clientHeight < 80;
+  $('scroll-btn').classList.toggle('visible', !atBottom);
+}
+function scrollToBottom() { $('messages').scrollTop = $('messages').scrollHeight; }
+
+// ═══════════════ Dropdowns ═══════════════
+function toggleDropdown(id) {
+  var dd = $(id);
+  if (!dd) return;
+  var isOpen = dd.classList.contains('open');
+  closeAllDropdowns();
+  if (!isOpen) {
+    if (id === 'mode-dd') initModeDropdown();
+    else if (id === 'preset-dd') rebuildPresetDropdown();
+    else if (id === 'effort-dd') rebuildEffortDropdown();
+    dd.classList.add('open');
+  }
+}
+function closeAllDropdowns() {
+  document.querySelectorAll('.dropdown-menu').forEach(function(d){ d.classList.remove('open'); });
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.dropdown-wrap')) closeAllDropdowns();
+});
+
+function buildDropdown(id, options, current, onChange) {
+  var dd = $(id); if (!dd) return;
+  dd.innerHTML = '';
+  options.forEach(function(opt) {
+    var item = el('div', 'dropdown-item' + (opt.value === current ? ' selected' : ''));
+    if (opt.desc) {
+      item.innerHTML = (opt.icon ? '<span>' + opt.icon + '</span>' : '') + '<div class="item-label"><span>' + escHtml(opt.label) + '</span><span class="item-desc">' + escHtml(opt.desc) + '</span></div>';
+    } else {
+      item.textContent = (opt.icon ? opt.icon + ' ' : '') + opt.label;
+    }
+    if (opt.value === current) item.appendChild(el('span', 'check', '✓'));
+    item.onclick = function() { onChange(opt.value); closeAllDropdowns(); };
+    dd.appendChild(item);
+  });
+}
+
+// ── Mode ──
+function initModeDropdown() {
+  var dd = $('mode-dd'); if (!dd) return;
+  dd.innerHTML = '';
+  MODES.forEach(function(m) {
+    var item = el('div', 'dropdown-item' + (m.id === state.mode ? ' selected' : ''));
+    item.innerHTML = '<span>' + m.icon + '</span><div class="item-label"><span>' + m.label + '</span><span class="item-desc">' + m.desc + '</span></div>';
+    if (m.id === state.mode) item.appendChild(el('span', 'check', '✓'));
+    item.onclick = function() { selectMode(m.id); closeAllDropdowns(); };
+    dd.appendChild(item);
+  });
+}
+function selectMode(modeId) {
+  if (modeId === state.mode) return;
+  state.mode = modeId;
+  var m = MODE_MAP[modeId];
+  $('mode-label').textContent = m ? m.label : modeId;
+  $('mode-icon').textContent = m ? m.icon : '⚙';
+  var btn = $('mode-btn');
+  btn.className = 'tb-btn mode-btn' + (m ? ' mode-' + modeId : '');
+  sendToJava('config:mode:' + modeId);
+}
+
+// ── Preset ──
+function rebuildPresetDropdown() {
+  buildDropdown('preset-dd', PRESET_OPTS, state.preset, function(v) {
+    state.preset = v;
+    var opt = PRESET_OPTS.find(function(o){ return o.value === v; });
+    $('preset-label').textContent = v;
+    $('preset-icon').textContent = opt ? opt.icon : '';
+    sendToJava('config:preset:' + v);
+  });
+}
+
+// ── Effort ──
+function rebuildEffortDropdown() {
+  buildDropdown('effort-dd', EFFORT_OPTS, state.effort, function(v) {
+    state.effort = v;
+    var opt = EFFORT_OPTS.find(function(o){ return o.value === v; });
+    $('effort-label').textContent = v;
+    $('effort-icon').textContent = opt ? opt.icon : '';
+    sendToJava('config:effort:' + v);
+  });
+}
+
+// ── Init ──
+function initDropdowns() {
+  initModeDropdown();
+  rebuildPresetDropdown();
+  rebuildEffortDropdown();
+  var po = PRESET_OPTS.find(function(o){ return o.value === state.preset; });
+  $('preset-label').textContent = state.preset;
+  if (po) $('preset-icon').textContent = po.icon;
+  var eo = EFFORT_OPTS.find(function(o){ return o.value === state.effort; });
+  $('effort-label').textContent = state.effort;
+  if (eo) $('effort-icon').textContent = eo.icon;
+  updateStatusBar();
+}
+function setConfig(model, preset, effort) {
+  if (model) state.model = model;
+  if (preset) { state.preset = preset; var pl = $('preset-label'); var pi = $('preset-icon'); var po = PRESET_OPTS.find(function(o){ return o.value === preset; }); if (pl) pl.textContent = preset; if (pi && po) pi.textContent = po.icon; }
+  if (effort) { state.effort = effort; var el = $('effort-label'); var ei = $('effort-icon'); var eo = EFFORT_OPTS.find(function(o){ return o.value === effort; }); if (el) el.textContent = effort; if (ei && eo) ei.textContent = eo.icon; }
+  updateStatusBar();
+}
+
+// ═══════════════ Info Bar ═══════════════
+function updateStatusBar() {
+  var m = MODE_MAP[state.mode] || MODE_MAP['auto'];
+  $('mode-label').textContent = m ? m.label : state.mode;
+  $('mode-icon').textContent = m ? m.icon : '⚙';
+  var btn = $('mode-btn');
+  if (btn && m) btn.className = 'tb-btn mode-btn mode-' + state.mode;
+}
+
+function setStatusInfo(jsonStr) {
+  try {
+    var info = JSON.parse(jsonStr);
+    if (info.mode) selectMode(info.mode);
+    if (info.model) state.model = info.model;
+    if (info.preset) { state.preset = info.preset; var pl = $('preset-label'); var pi = $('preset-icon'); var po = PRESET_OPTS.find(function(o){ return o.value === info.preset; }); if (pl) pl.textContent = info.preset; if (pi && po) pi.textContent = po.icon; }
+    if (info.effort) { state.effort = info.effort; var el = $('effort-label'); var ei = $('effort-icon'); var eo = EFFORT_OPTS.find(function(o){ return o.value === info.effort; }); if (el) el.textContent = info.effort; if (ei && eo) ei.textContent = eo.icon; }
+
+    // Cache
+    if (info.cachePct !== undefined && info.cachePct !== null) {
+      $('info-cache').textContent = 'cache ' + info.cachePct + '%';
+      $('info-cache').title = 'cache hit: ' + info.cachePct + '%';
+    }
+    // Context
+    if (info.ctxPct !== undefined && info.ctxPct !== null) {
+      var used = info.ctxUsed || 0, cap = info.ctxCap || 1000000;
+      var uk = (used / 1000).toFixed(used >= 100000 ? 0 : 1);
+      var mk = (cap / 1000).toFixed(cap >= 100000 ? 0 : 1);
+      $('info-ctx').textContent = '上下文 ' + uk + 'K/' + mk + 'K';
+      $('info-ctx').title = uk + 'K / ' + mk + 'K tokens';
+    }
+    // Cost
+    var parts = [];
+    if (info.costUsd !== undefined && info.costUsd !== null) parts.push('¥' + parseFloat(info.costUsd).toFixed(3));
+    if (info.balance !== undefined && info.balance !== null) parts.push('¥' + info.balance);
+    else if (info.costLeft !== undefined && info.costLeft !== null) parts.push('¥' + info.costLeft);
+    $('info-cost').textContent = parts.join(' / ');
+  } catch(e) {}
+}
+
+// ═══════════════ Token Indicator ═══════════════
+function setTokenUsage(pct, used, max) {
+  var wrapper = $('token-indicator');
+  wrapper.style.display = 'flex';
+  var fill = $('token-ring-fill');
+  var label = $('token-pct');
+  var tip = $('token-tooltip');
+  // circumference = 2 * PI * 5.5 ≈ 34.56
+  var offset = 34.56 * (1 - Math.min(pct, 100) / 100);
+  fill.setAttribute('stroke-dashoffset', offset);
+  var cls = 'low';
+  if (pct > 80) cls = 'high'; else if (pct > 50) cls = 'mid';
+  fill.className = 'token-ring-fill ' + cls;
+  var pctRound = Math.round(pct);
+  label.textContent = pctRound + '%';
+  if (used !== undefined && max !== undefined) {
+    var uk = (used / 1000).toFixed(used >= 100000 ? 0 : 1);
+    var mk = (max / 1000).toFixed(max >= 100000 ? 0 : 1);
+    tip.textContent = pctRound + '% · ' + uk + 'k / ' + mk + 'k context';
+  } else {
+    tip.textContent = pctRound + '% context used';
+  }
+}
+
+// ═══════════════ Context bar ═══════════════
+function setCodeContext(file, lines, chars, preview) {
+  state.ctxFile = file; state.ctxCode = preview;
+  var bar = $('context-bar');
+  bar.innerHTML = '';
+  var chip = el('div', 'ctx-chip');
+  chip.innerHTML = '<span class="ctx-icon">📎</span><span class="ctx-text">' + escHtml(file) + ' · ' + lines + '行 ' + chars + '字符</span><span class="ctx-close" onclick="clearCodeContext()">✕</span>';
+  bar.appendChild(chip);
+  var hint = el('span', 'ctx-hint', 'Selected code will be included as context');
+  bar.appendChild(hint);
+  bar.classList.add('visible');
+}
+function clearCodeContext() {
+  state.ctxFile = null; state.ctxCode = null;
+  var bar = $('context-bar');
+  bar.innerHTML = '<span class="ctx-hint">Selected code will be included as context</span>';
+  bar.classList.remove('visible');
+  sendToJava('ctx:clear');
+}
+
+// ═══════════════ Markdown ═══════════════
+function md(src) {
+  var ph = [];
+  function stash(regex, wrapper) {
+    return src.replace(regex, function(m, g1, g2) {
+      ph.push(wrapper(g1 || g2 || m));
+      return '\x00' + (ph.length - 1) + '\x00';
+    });
+  }
+  // Phase 1: Extract code blocks using line-by-line state machine
+  // This avoids regex catastrophic backtracking with unclosed blocks
+  var lines = src.split('\n');
+  var proseParts = [];
+  var inCode = false, codeLang = '', codeBuf = [];
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    var trimmed = line.trim();
+    if (trimmed.startsWith('```')) {
+      if (!inCode) {
+        proseParts.push({type:'prose', text:''});
+        inCode = true;
+        codeLang = trimmed.slice(3).trim().replace(/[^a-zA-Z0-9_.\-#]/g, '');
+        codeBuf = [];
+      } else {
+        inCode = false;
+        ph.push('<pre><span class="lang-tag">' + (codeLang || 'code') + '</span><code>' +
+          highlight(codeBuf.join('\n'), codeLang) +
+          '</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>');
+        proseParts.push({type:'code', id: ph.length - 1});
+        codeLang = ''; codeBuf = [];
+      }
+    } else if (inCode) {
+      codeBuf.push(line);
+    } else {
+      var last = proseParts[proseParts.length - 1];
+      if (!last || last.type !== 'prose') { last = {type:'prose', text:''}; proseParts.push(last); }
+      last.text += (last.text ? '\n' : '') + line;
+    }
+  }
+  // Handle trailing unclosed code block
+  if (inCode && codeBuf.length > 0) {
+    ph.push('<pre><span class="lang-tag">' + (codeLang || 'code') + '</span><code>' +
+      escHtml(codeBuf.join('\n')) +
+      '</code></pre>');
+    proseParts.push({type:'code', id: ph.length - 1});
+  }
+
+  // Phase 2: Process prose parts with markdown, then reassemble
+  var result = '';
+  for (var p = 0; p < proseParts.length; p++) {
+    var part = proseParts[p];
+    if (part.type === 'code') {
+      result += '\x00' + part.id + '\x00';
+    } else {
+      var txt = part.text;
+      // Inline code (direct replace, no placeholders)
+      txt = txt.replace(/`([^`]+)`/g, function(m, c) { return '<code>' + escHtml(c) + '</code>'; });
+      // Tables
+      txt = txt.replace(/((?:^\|.*(?:\n|$)){2,})/gm, function(m) {
+        var tlines = m.trim().split('\n');
+        var headerCells = null, bodyRows = [], afterSep = false;
+        for (var ti = 0; ti < tlines.length; ti++) {
+          var cells = tlines[ti].split('|').map(function(c){ return c.trim(); });
+          if (cells[0] === '') cells.shift();
+          if (cells[cells.length-1] === '') cells.pop();
+          if (cells.length > 0 && cells.every(function(c){ return /^:?-{3,}:?$/.test(c); })) {
+            afterSep = true; continue;
+          }
+          if (!afterSep && headerCells === null) { headerCells = cells; }
+          else { bodyRows.push(cells); }
+        }
+        var h = '<table>';
+        if (headerCells) h += '<thead><tr>'+headerCells.map(function(c){return '<th>'+c+'</th>';}).join('')+'</tr></thead>';
+        if (bodyRows.length) { h += '<tbody>'; for (var tj=0;tj<bodyRows.length;tj++) h += '<tr>'+bodyRows[tj].map(function(c){return '<td>'+c+'</td>';}).join('')+'</tr>'; h += '</tbody>'; }
+        return h+'</table>';
+      });
+      txt = txt.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+      txt = txt.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+      txt = txt.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+      txt = txt.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+      txt = txt.replace(/\*(.+?)\*/g, '<i>$1</i>');
+      txt = txt.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(m, t, u) {
+        var href = u;
+        if (/^javascript:/i.test(href)) href = '';
+        return '<a href="' + escHtml(href) + '" target="_blank" rel="noopener noreferrer">' + t + '</a>';
+      });
+      txt = txt.replace(/((?:^>\s?.+(?:\n|$))+)/gm, function(m) {
+        return '<blockquote>' + m.trim().split('\n').map(function(l){ return l.replace(/^>\s?/, ''); }).join('<br>') + '</blockquote>';
+      });
+      txt = txt.replace(/^---$/gm, '<hr>');
+      txt = txt.replace(/((?:^[\-\*] .+(?:\n|$))+)/gm, function(m) {
+        return '<ul>' + m.trim().split('\n').map(function(l){ return '<li>'+l.replace(/^[\-\*] /,'')+'</li>'; }).join('') + '</ul>';
+      });
+      txt = txt.replace(/((?:^\d+\. .+(?:\n|$))+)/gm, function(m) {
+        return '<ol>' + m.trim().split('\n').map(function(l){ return '<li>'+l.replace(/^\d+\. /,'')+'</li>'; }).join('') + '</ol>';
+      });
+      txt = txt.replace(/([^\n])\n\n([^\n])/g, '$1</p><p>$2');
+      txt = txt.replace(/\n/g, '<br>');
+      result += txt;
+    }
+  }
+  result = result.replace(/\x00(\d+)\x00/g, function(_,i){ return ph[parseInt(i)]; });
+  return '<div class="md"><p>' + result + '</p></div>';
+}
+
+// ═══════════════ Code Highlight ═══════════════
+var KW = {
+  python:/\b(def|class|if|elif|else|for|while|return|import|from|as|try|except|finally|with|yield|lambda|pass|break|continue|raise|in|not|and|or|is|None|True|False|self|async|await)\b/g,
+  kotlin:/\b(fun|val|var|class|interface|object|if|else|when|for|while|return|import|package|try|catch|finally|throw|as|is|in|by|companion|data|sealed|enum|suspend|override|private|public|protected|internal|abstract|open|final|lateinit|lazy|init|this|super|true|false|null)\b/g,
+  java:/\b(public|private|protected|class|interface|enum|extends|implements|import|package|if|else|for|while|do|return|try|catch|finally|throw|throws|new|this|super|static|final|abstract|synchronized|volatile|transient|native|void|int|long|double|float|boolean|char|byte|short|String|null|true|false)\b/g,
+  typescript:/\b(function|const|let|var|class|interface|type|enum|if|else|for|while|return|import|export|from|as|default|try|catch|finally|throw|new|this|super|extends|implements|async|await|of|in|null|undefined|true|false|any|void|string|number|boolean|readonly|public|private|protected)\b/g,
+  javascript:/\b(function|const|let|var|class|if|else|for|while|return|import|export|from|default|try|catch|finally|throw|new|this|super|extends|async|await|of|in|null|undefined|true|false|typeof|instanceof)\b/g,
+  go:/\b(func|package|import|if|else|for|range|return|var|const|type|struct|interface|map|chan|go|defer|select|case|default|switch|break|continue|fallthrough|nil|true|false|make|new|len|cap|append)\b/g,
+  rust:/\b(fn|let|mut|pub|struct|enum|impl|trait|use|mod|crate|self|super|if|else|for|while|loop|return|match|as|in|ref|move|async|await|Some|None|Ok|Err|true|false)\b/g,
+  sql:/\b(SELECT|FROM|WHERE|AND|OR|NOT|IN|INSERT|INTO|VALUES|UPDATE|SET|DELETE|CREATE|TABLE|ALTER|DROP|INDEX|JOIN|LEFT|RIGHT|INNER|OUTER|ON|GROUP|BY|ORDER|HAVING|LIMIT|OFFSET|AS|UNION|ALL|DISTINCT|NULL|IS|BETWEEN|LIKE|EXISTS|CASE|WHEN|THEN|ELSE|END|WITH)\b/gi,
+  bash:/\b(if|then|else|elif|fi|for|while|do|done|case|esac|function|return|exit|local|export|source|alias|echo|cd|ls|grep|sed|awk|find|chmod|chown|mkdir|rm|cp|mv|cat|sudo|apt|brew|npm|npx|git)\b/g,
+  cpp:/\b(if|else|for|while|do|return|switch|case|default|break|continue|class|struct|enum|namespace|template|typename|public|private|protected|virtual|override|const|static|auto|void|int|long|double|float|char|bool|nullptr|true|false|using|include|define|std|string|vector|map|set|pair|shared_ptr|unique_ptr)\b/g,
+  html:/(&lt;\/?[a-zA-Z][^&]*?&gt;)/g
+};
+function highlight(code, lang) {
+  var kw = KW[lang] || KW[(lang||'').toLowerCase()];
+  if (!kw) return escHtml(code);
+  var ph = [], r = escHtml(code);
+  r = r.replace(/(["'])(?:(?=(\\?))\2.)*?\1|`[^`]*`/g, function(m){ph.push('<span style="color:#a5d6a7">'+m+'</span>');return '\x00'+(ph.length-1)+'\x00';});
+  r = r.replace(/\/\/.*$|#.*$/gm, function(m){ph.push('<span style="color:#78909c">'+m+'</span>');return '\x00'+(ph.length-1)+'\x00';});
+  r = r.replace(kw, '<span style="color:#c792ea">$&</span>');
+  r = r.replace(/\b(\d+\.?\d*)\b/g, '<span style="color:#f78c6c">$1</span>');
+  r = r.replace(/\x00(\d+)\x00/g, function(_,i){return ph[parseInt(i)];});
+  return r;
+}
+function copyCode(btn) {
+  var code = btn.parentElement.querySelector('code');
+  if (!code) return;
+  var text = code.textContent;
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).catch(function(){});
+  btn.textContent = 'Copied!'; btn.classList.add('copied');
+  setTimeout(function(){ btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+}
+
+// ═══════════════ Messages ═══════════════
+function appendUserMessage(text) {
+  hideWelcome();
+  var d = el('div', 'bubble user', escHtml(text).replace(/\n/g, '<br>'));
+  d.appendChild(el('div', 'meta', meta()));
+  $('messages').appendChild(d);
+  startAI(); scroll();
+}
+function startAI() {
+  state.finalized = false;
+  state.streamMsg = el('div', 'bubble ai');
+  state.streamMsg.appendChild(el('div', 'md'));
+  state.streamMsg.appendChild(el('div', 'meta', meta()));
+  $('messages').appendChild(state.streamMsg);
+  state.streamEl = state.streamMsg.querySelector('.md');
+  state.streamText = '';
+}
+function appendChunk(text) {
+  if (!state.streamEl) startAI();
+  state.streamText += text;
+  if (state.finalized) return;
+  try {
+    state.streamEl.innerHTML = md(state.streamText);
+  } catch(e) {
+    // Fallback: plain text with basic escaping
+    state.streamEl.innerHTML = '<div class="md"><p>' + escHtml(state.streamText).replace(/\n/g, '<br>') + '</p></div>';
+  }
+  scroll();
+}
+function finalizeStream() {
+  if (state.streamEl && state.streamText && !state.finalized) {
+    var txt = state.streamText;
+    var ticks = txt.match(/```/g);
+    if (ticks && ticks.length % 2 !== 0) txt += '\n```';
+    try { state.streamEl.innerHTML = md(txt); }
+    catch(e) { state.streamEl.innerHTML = '<div class="md"><p>' + escHtml(txt).replace(/\n/g, '<br>') + '</p></div>'; }
+    state.finalized = true;
+  }
+  state.streamMsg = null; state.streamEl = null; state.streamText = '';
+}
+function showThinking() {
+  hideWelcome();
+  if (state.thinkEl) return;
+  state.thinkEl = el('div', 'bubble thinking');
+  state.thinkEl.textContent = 'Thinking ';
+  state.thinkEl.appendChild(el('span', 'dots', '<span>.</span><span>.</span><span>.</span>'));
+  $('messages').appendChild(state.thinkEl);
+  state.thinkStream = '';
+  scroll();
+}
+function showThoughtChunk(text) {
+  hideWelcome();
+  if (!state.thinkEl) {
+    state.thinkEl = el('div', 'bubble thinking');
+    state.thinkEl.textContent = 'Thinking ';
+    state.thinkEl.appendChild(el('span', 'dots', '<span>.</span><span>.</span><span>.</span>'));
+    $('messages').appendChild(state.thinkEl);
+    state.thinkStream = '';
+  }
+  state.thinkStream += text;
+  scroll();
+}
+function hideThinking() {
+  if (state.thinkEl) {
+    var details = el('details', '');
+    details.innerHTML = '<summary style="cursor:pointer;font-size:11px;color:var(--text3);margin-bottom:4px">Show thinking</summary><div class="md" style="font-size:12px;color:var(--text2)">' + md(state.thinkStream) + '</div>';
+    state.thinkEl.textContent = '';
+    state.thinkEl.appendChild(details);
+    state.thinkEl = null; state.thinkStream = '';
+  }
+  finalizeStream();
+}
+function appendError(msg) {
+  hideWelcome();
+  $('messages').appendChild(el('div', 'bubble error', 'Error: ' + escHtml(msg)));
+  scroll();
+}
+
+// Append raw HTML to the last AI message (used for command output)
+function appendHtmlToLast(html) {
+  hideWelcome();
+  var lastMsg = $('messages').lastElementChild;
+  if (!lastMsg || !lastMsg.classList.contains('bubble') || lastMsg.classList.contains('user')) {
+    // Create a new ai bubble for the output
+    var bubble = el('div', 'bubble ai');
+    var mdDiv = el('div', 'md');
+    mdDiv.innerHTML = html;
+    bubble.appendChild(mdDiv);
+    bubble.appendChild(el('div', 'meta', meta()));
+    $('messages').appendChild(bubble);
+  } else {
+    // Append to the last ai message
+    var mdDiv = lastMsg.querySelector('.md');
+    if (mdDiv) mdDiv.innerHTML += html;
+  }
+  scroll();
+}
+
+// ═══════════════ Tool Calls ═══════════════
+function startToolCall(id, title) {
+  hideWelcome();
+  var tc = el('div', 'tool-call');
+  tc.id = 'tc-' + id;
+  tc.innerHTML = '<div class="tool-header" onclick="toggleTool(this)"><span class="icon">▼</span><span>' + escHtml(title) + '</span><span class="tool-status run">running…</span></div><div class="tool-body"></div>';
+  $('messages').appendChild(tc); scroll();
+}
+function updateToolCall(id, status, content) {
+  var tc = $('tc-' + id); if (!tc) return;
+  var s = tc.querySelector('.tool-status'); if (!s) return;
+  var map = { completed: ['✓ done','done'], failed: ['✗ failed','fail'], in_progress: ['▶ running','run'] };
+  var st = map[status] || [status, ''];
+  s.textContent = st[0]; s.className = 'tool-status ' + st[1];
+  if (content) {
+    var body = tc.querySelector('.tool-body');
+    if (body) body.textContent = content;
+  }
+  scroll();
+}
+function toggleTool(header) {
+  header.classList.toggle('collapsed');
+  header.nextElementSibling.classList.toggle('hidden');
+}
+
+// ═══════════════ Permissions ═══════════════
+function showPermission(cbId, title, optionsJson) {
+  hideWelcome();
+  var options = JSON.parse(optionsJson);
+  var card = el('div', 'perm-card');
+  card.innerHTML = '<div class="perm-title">🔒 Permission Required</div><div class="perm-desc">' + escHtml(title) + '</div><div class="perm-btns"></div>';
+  var btns = card.querySelector('.perm-btns');
+  options.forEach(function(opt) {
+    var btn = document.createElement('button');
+    btn.textContent = opt.replace(/_/g, ' ');
+    if (opt.indexOf('allow') >= 0) btn.className = 'allow';
+    btn.onclick = function() {
+      sendToJava('permission:' + cbId + ':' + opt);
+      card.innerHTML = '<div class="perm-desc" style="color:var(--accent)"></div>';
+      card.querySelector('.perm-desc').textContent = '✓ ' + opt.replace(/_/g, ' ');
+    };
+    btns.appendChild(btn);
+  });
+  $('messages').appendChild(card); scroll();
+}
+function clearChat() {
+  $('messages').innerHTML = '<div class="welcome" id="welcome"><h2>RX GUI</h2><p>Reasonix AI Coding Assistant</p><div class="hint">Enter to send &middot; Shift+Enter for newline &middot; Select code in editor to attach</div></div>';
+  state.streamMsg = null; state.streamEl = null; state.streamText = ''; state.thinkEl = null; state.thinkStream = '';
+  clearCodeContext();
+}
+// ═══════════════ Send / Ste═══════════════
+function send() {
+  if (state.thinking) { stop(); return; }
+  var text = $('input-box').value.trim();
+  if (!text) return;
+  var isCmd = text.startsWith('/');
+  if (isCmd) {
+    // Command: Kotlin handles UI
+    // Immediately update UI for model/preset/effort/mode switches
+    var parts = text.split(/\s+/);
+    if (parts[0] === '/model' && parts[1]) { state.model = parts[1]; updateStatusBar(); }
+    if (parts[0] === '/preset' && parts[1]) { state.preset = parts[1]; var po = PRESET_OPTS.find(function(o){return o.value===parts[1];}); $('preset-label').textContent = parts[1]; if (po) $('preset-icon').textContent = po.icon; }
+    if (parts[0] === '/effort' && parts[1]) { state.effort = parts[1]; var eo = EFFORT_OPTS.find(function(o){return o.value===parts[1];}); $('effort-label').textContent = parts[1]; if (eo) $('effort-icon').textContent = eo.icon; }
+    if (parts[0] === '/mode' && parts[1]) { selectMode(parts[1]); }
+    $('input-box').value = '';
+    autoResize();
+    sendToJava('send:' + text);
+  } else {
+    appendUserMessage(text);
+    $('input-box').value = '';
+    autoResize();
+    setThinking(true);
+    var ctx = state.ctxFile ? 'Selected code from `' + state.ctxFile + '`:\n```\n' + state.ctxCode + '\n```' : null;
+    sendToJava('send:' + text + (ctx ? '\n__CTX__' + ctx : ''));
+  }
+}
+function stop() {
+  setThinking(false);
+  sendToJava('stop');
+}
+function setThinking(v) {
+  state.thinking = v;
+  var btn = $('send-btn');
+  if (v) {
+    btn.textContent = '■ Stop';
+    btn.className = 'tb-btn danger';
+  } else {
+    btn.textContent = 'Send';
+    btn.className = 'tb-btn primary';
+  }
+  if (v) showThinking(); else hideThinking();
+}
+function onDone() { setThinking(false); }
+function onError(msg) { setThinking(false); appendError(msg); }
+
+// ═══════════════ Auto-resize Textarea ═══════════════
+function autoResize() {
+  var tb = $('input-box');
+  tb.style.height = '';
+  var sh = tb.scrollHeight;
+  tb.style.height = Math.max(44, Math.min(sh, 200)) + 'px';
+}
+$('input-box').addEventListener('input', function() {
+  autoResize();
+  openCmdAutocomplete();
+});
+// Also resize on init
+setTimeout(autoResize, 50);
+
+// ═══════════════ Keyboard ═══════════════
+$('input-box').addEventListener('keydown', function(e) {
+  if (cmdState.open) {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      cmdState.selectedIdx = Math.min(cmdState.selectedIdx + 1, cmdState.filtered.length - 1);
+      renderCmdAutocomplete();
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      cmdState.selectedIdx = Math.max(cmdState.selectedIdx - 1, 0);
+      renderCmdAutocomplete();
+      return;
+    }
+    if (e.key === 'Tab' || (e.key === 'Enter' && !e.shiftKey)) {
+      e.preventDefault();
+      var selected = cmdState.filtered[cmdState.selectedIdx];
+      if (selected) selectCmdItem(selected);
+      return;
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeCmdAutocomplete();
+      return;
+    }
+  }
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  if (e.key === 'Escape') { closeAllDropdowns(); }
+});
+
+// ═══════════════ Init ═══════════════
+if (window._rxMode) state.mode = window._rxMode;
+initDropdowns();
+
+// Bridge placeholder (injected by Java)
+if (typeof sendToJava === 'undefined') { window.sendToJava = function(msg) { console.log('[bridge]', msg); }; }
+</script>
+</body>
+</html>
