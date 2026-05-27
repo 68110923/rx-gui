@@ -2,6 +2,12 @@
 
 在 JetBrains IDE 侧边栏中直接与 Reasonix AI 对话，支持流式响应、Markdown 渲染、代码 Diff 审阅、费用/余额实时显示。
 
+## 下载安装
+
+[**下载 rx-gui-0.2.0.zip**](https://github.com/68110923/rx-gui/raw/main/build/distributions/rx-gui-0.2.0.zip)
+
+IDE → Settings → Plugins → ⚙ → Install Plugin from Disk → 选择 zip → 重启即可使用
+
 ## 功能
 
 - **流式 AI 对话** — 实时 Markdown 渲染 + 代码语法高亮
