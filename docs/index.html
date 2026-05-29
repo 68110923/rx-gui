@@ -254,6 +254,7 @@ footer .links a:hover { color: var(--accent); }
 
 /* ── Mobile ── */
 @media (max-width: 640px) {
+  #theme-toggle { top: 54px; }
   .container { padding: 48px 16px; }
   .features { grid-template-columns: 1fr; }
   .install-steps { grid-template-columns: 1fr; }
@@ -265,6 +266,7 @@ footer .links a:hover { color: var(--accent); }
 }
 
 @media (max-width: 400px) {
+  #theme-toggle { top: 64px; }
   .hero { padding: 60px 16px 40px; }
   .hero .logo { width: 56px; height: 56px; font-size: 22px; }
   .sponsor-grid { gap: 16px; }
@@ -279,7 +281,6 @@ footer .links a:hover { color: var(--accent); }
 <button id="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
 
 <nav>
-  <a href="#preview">Preview</a>
   <a href="#features">Features</a>
   <a href="#install">Install</a>
   <a href="#arch">Architecture</a>
