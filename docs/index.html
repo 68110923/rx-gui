@@ -230,11 +230,12 @@ nav a:hover { color: var(--accent); }
   text-align: center; margin: 0;
 }
 .sponsor-grid img {
-  width: 200px; height: 200px; border-radius: 12px;
+  width: 200px; max-width: 100%; height: auto; border-radius: 12px;
   border: 1px solid var(--border); box-shadow: var(--shadow);
-  max-width: 100%; height: auto;
 }
-:root[data-theme="dark"] .sponsor-grid img,
+:root[data-theme="dark"] .sponsor-grid img {
+  filter: brightness(.9);
+}
 @media (prefers-color-scheme: dark) {
   .sponsor-grid img { filter: brightness(.9); }
 }
@@ -258,7 +259,7 @@ footer .links a:hover { color: var(--accent); }
   .install-steps { grid-template-columns: 1fr; }
   .hero h1 { font-size: 28px; }
   .hero .btns a { padding: 10px 20px; font-size: 14px; }
-  .sponsor-grid img { width: 160px; height: 160px; }
+  .sponsor-grid img { width: 160px; }
   .command-box { font-size: 12px; padding: 14px 16px; }
   .arch-diagram { padding: 16px; }
 }
@@ -267,7 +268,7 @@ footer .links a:hover { color: var(--accent); }
   .hero { padding: 60px 16px 40px; }
   .hero .logo { width: 56px; height: 56px; font-size: 22px; }
   .sponsor-grid { gap: 16px; }
-  .sponsor-grid img { width: 130px; height: 130px; }
+  .sponsor-grid img { width: 130px; }
   nav { gap: 14px; }
   nav a { font-size: 12px; }
 }
@@ -306,7 +307,7 @@ footer .links a:hover { color: var(--accent); }
     <h2>Preview / 预览</h2>
     <p class="section-sub">Sidebar AI chat in action · 侧边栏 AI 对话实况</p>
     <div class="screenshot-wrap">
-      <img src="https://raw.githubusercontent.com/68110923/rx-gui/main/src/main/resources/rx_gui_exhibit/rx_gui_preview.png" alt="RX GUI screenshot"/>
+      <img src="rx_gui_exhibit/rx_gui_preview.png" alt="RX GUI screenshot"/>
     </div>
   </div>
 </div>
