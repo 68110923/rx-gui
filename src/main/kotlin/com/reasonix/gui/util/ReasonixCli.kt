@@ -64,21 +64,33 @@ object ReasonixCli {
 
     /** Resolve the shell PATH for subprocesses (cross-platform). */
     fun getShellPath(): String {
+        val envPath = System.getenv("PATH")
+
         if (!IS_WIN) {
-            // Use zsh on macOS (loads .zprofile where brew shellenv adds paths)
-            val shell = if (File("/bin/zsh").exists()) "/bin/zsh" else "/bin/sh"
-            return try {
-                val p = ProcessBuilder(shell, "-l", "-c", "echo \$PATH")
-                    .redirectErrorStream(true).start()
-                val out = p.inputStream.bufferedReader().readText().trim()
-                p.waitFor(3, TimeUnit.SECONDS)
-                if (out.isNotEmpty()) out else System.getenv("PATH") ?: "/usr/local/bin:/usr/bin:/bin"
-            } catch (_: Exception) {
-                System.getenv("PATH") ?: "/usr/local/bin:/usr/bin:/bin"
+            val isMac = System.getProperty("os.name").startsWith("Mac", ignoreCase = true)
+            // macOS: GUI-launched apps don't inherit shell profile paths (Homebrew, etc.)
+            // Linux: use user's configured shell if PATH seems incomplete
+            val shell = when {
+                isMac && File("/bin/zsh").exists() -> "/bin/zsh"
+                else -> {
+                    val userShell = System.getenv("SHELL")
+                    if (!userShell.isNullOrBlank() && File(userShell).exists()) userShell else null
+                }
             }
+            if (shell != null) {
+                try {
+                    val p = ProcessBuilder(shell, "-l", "-c", "echo \$PATH")
+                        .redirectErrorStream(true).start()
+                    val out = p.inputStream.bufferedReader().readText().trim()
+                    p.waitFor(3, TimeUnit.SECONDS)
+                    if (out.isNotBlank()) return out
+                } catch (_: Exception) {}
+            }
+            return envPath ?: "/usr/local/bin:/usr/bin:/bin"
         }
-        val envPath = System.getenv("PATH") ?: System.getenv("Path")
-        if (envPath != null && envPath.isNotBlank()) return envPath
+
+        val winPath = System.getenv("Path")
+        if (!winPath.isNullOrBlank()) return winPath
         return "C:\\Windows\\system32;C:\\Windows;C:\\Windows\\System32\\Wbem"
     }
 
@@ -128,8 +140,11 @@ object ReasonixCli {
     private fun configFile(): File = File(home(".reasonix/config.json"))
 
     private fun home(sub: String): String {
-        val userHome = System.getProperty("user.home") ?: System.getenv("HOME") ?: System.getenv("USERPROFILE") ?: "."
-        return "$userHome${File.separator}$sub"
+        val userHome = System.getProperty("user.home")
+            ?: System.getenv("HOME")
+            ?: System.getenv("USERPROFILE")
+            ?: "."
+        return File(userHome, sub).absolutePath
     }
 
     private fun expandEnv(s: String): String {

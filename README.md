@@ -72,3 +72,11 @@ rx-gui/
 - **后端**: Kotlin，ACP 协议 (stdin/stdout NDJSON JSON-RPC 2.0)
 - **数据获取**: REST API (`/api/overview`) 获取费用/余额，`usage.jsonl` 作为后备
 - **兼容性**: 依赖 `com.intellij.modules.platform`，全 JetBrains IDE 可用
+
+## 支持作者 / Support the Author
+
+如果这个插件对你有帮助，可以请作者喝杯咖啡 ☕
+
+| 微信赞赏 | 支付宝赞赏 |
+|:---:|:---:|
+| <img width="200" src="docs/payment_code/weixin.jpg" alt="weixin"/> | <img width="200" src="docs/payment_code/alipay.jpg" alt="alipay"/> |

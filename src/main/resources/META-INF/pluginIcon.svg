@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+  <!-- reasonix 风格图标：对话气泡 + Rx -->
+  <rect width="40" height="40" rx="8" fill="#4F46E5"/>
+  <path d="M8 14C8 11.8 9.8 10 12 10H28C30.2 10 32 11.8 32 14V22C32 24.2 30.2 26 28 26H22L16 31V26H12C9.8 26 8 24.2 8 22V14Z" fill="white" opacity="0.9"/>
+  <text x="20" y="22" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#4F46E5">Rx</text>
+</svg>

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RX GUI — Reasonix AI Coding Assistant</title>
+<style>
+:root {
+  --bg: #f8f9fa; --bg2: #ffffff; --bg3: #e9ecef; --text: #212529; --text2: #495057;
+  --text3: #6c757d; --border: #dee2e6; --accent: #4F46E5; --accent2: #eef2ff;
+  --accent-light: #818cf8; --card-bg: #ffffff; --shadow: 0 1px 3px rgba(0,0,0,.08);
+  --shadow-lg: 0 4px 24px rgba(0,0,0,.1); --radius: 12px; --radius-sm: 8px;
+  --code-bg: #263238; --code-text: #eeffff;
+  --hero-gradient: linear-gradient(135deg, #4F46E5 0%, #7c3aed 50%, #a855f7 100%);
+}
+:root[data-theme="dark"] {
+  --bg: #0f0f13; --bg2: #1a1a23; --bg3: #22222e; --text: #e4e4e7; --text2: #a1a1aa;
+  --text3: #71717a; --border: #27272a; --accent: #818cf8; --accent2: #1e1b4a;
+  --accent-light: #6366f1; --card-bg: #1a1a23; --shadow: 0 1px 3px rgba(0,0,0,.3);
+  --shadow-lg: 0 4px 24px rgba(0,0,0,.4); --code-bg: #1e1e1e; --code-text: #d4d4d4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f0f13; --bg2: #1a1a23; --bg3: #22222e; --text: #e4e4e7; --text2: #a1a1aa;
+    --text3: #71717a; --border: #27272a; --accent: #818cf8; --accent2: #1e1b4a;
+    --accent-light: #6366f1; --card-bg: #1a1a23; --shadow: 0 1px 3px rgba(0,0,0,.3);
+    --shadow-lg: 0 4px 24px rgba(0,0,0,.4);
+  }
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  background: var(--bg); color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Theme Toggle ── */
+#theme-toggle {
+  position: fixed; top: 16px; right: 20px; z-index: 100;
+  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border);
+  background: var(--bg2); color: var(--text); cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow); transition: all .2s; opacity: .6;
+}
+#theme-toggle:hover { opacity: 1; transform: scale(1.1); }
+
+/* ── Nav ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 99;
+  background: rgba(255,255,255,.7); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border); display: flex;
+  align-items: center; justify-content: center; gap: 28px; padding: 10px 20px;
+}
+:root[data-theme="dark"] nav { background: rgba(15,15,19,.8); }
+@media (prefers-color-scheme: dark) {
+  nav { background: rgba(15,15,19,.8); }
+}
+nav a {
+  text-decoration: none; color: var(--text2); font-size: 13px; font-weight: 500;
+  transition: color .15s;
+}
+nav a:hover { color: var(--accent); }
+
+/* ── Hero ── */
+.hero {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+  padding: 80px 20px 60px;
+  background: var(--hero-gradient);
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 30% 50%, rgba(255,255,255,.12) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 50%, rgba(255,255,255,.08) 0%, transparent 60%);
+}
+.hero > * { position: relative; z-index: 1; }
+.hero .logo {
+  width: 72px; height: 72px; border-radius: 16px; background: rgba(255,255,255,.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 20px;
+  backdrop-filter: blur(8px);
+}
+.hero h1 {
+  font-size: clamp(32px, 5vw, 56px); font-weight: 800; color: #fff;
+  line-height: 1.15; margin-bottom: 12px; letter-spacing: -.02em;
+}
+.hero p {
+  font-size: clamp(16px, 2vw, 20px); color: rgba(255,255,255,.85);
+  max-width: 600px; line-height: 1.6; margin-bottom: 8px;
+}
+.hero .sub { font-size: 14px; color: rgba(255,255,255,.65); margin-bottom: 32px; }
+.hero .btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.hero .btns a {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 28px; border-radius: 8px; font-size: 15px; font-weight: 600;
+  text-decoration: none; transition: all .2s;
+}
+.hero .btns .primary {
+  background: #fff; color: #4F46E5;
+}
+.hero .btns .primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+.hero .btns .secondary {
+  background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.25);
+}
+.hero .btns .secondary:hover { background: rgba(255,255,255,.2); }
+
+.scroll-hint {
+  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+  color: rgba(255,255,255,.5); font-size: 12px; animation: bounce 2s infinite;
+}
+@keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(8px)} }
+
+/* ── Section ── */
+section { padding: 80px 20px; max-width: 1024px; margin: 0 auto; }
+section h2 {
+  font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 8px;
+}
+section .section-sub {
+  text-align: center; color: var(--text3); font-size: 15px; margin-bottom: 48px;
+}
+
+/* ── Screenshot ── */
+.screenshot-wrap {
+  text-align: center; margin-bottom: 16px;
+}
+.screenshot-wrap img {
+  max-width: 100%; border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+}
+
+/* ── Features ── */
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.feature {
+  background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 24px; transition: all .2s;
+}
+.feature:hover { border-color: var(--accent); box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+.feature .icon { font-size: 24px; margin-bottom: 8px; }
+.feature h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.feature p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+.feature .zh { color: var(--text3); font-size: 12px; }
+
+/* ── Install ── */
+.install-steps {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;
+  margin-bottom: 24px;
+}
+.install-step {
+  background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 20px; text-align: center;
+}
+.install-step .num {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--accent);
+  color: #fff; font-size: 13px; font-weight: 700; display: inline-flex;
+  align-items: center; justify-content: center; margin-bottom: 8px;
+}
+.install-step h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.install-step p { font-size: 12px; color: var(--text2); }
+
+.download-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600;
+  background: var(--hero-gradient); color: #fff; text-decoration: none;
+  transition: all .2s; margin: 0 auto; width: fit-content;
+}
+.download-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(79,70,229,.3); }
+
+/* ── Prerequisites ── */
+.prereq-list { display: grid; gap: 8px; max-width: 600px; margin: 0 auto; }
+.prereq-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-size: 14px;
+}
+.prereq-item .check { color: #22c55e; font-weight: 700; }
+.prereq-item code { font-size: 12px; background: var(--bg3); padding: 2px 6px; border-radius: 4px; }
+
+/* ── Commands ── */
+.command-box {
+  background: var(--code-bg); color: var(--code-text); border-radius: var(--radius);
+  padding: 20px 24px; font: 14px/1.7 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  overflow-x: auto; margin: 0 auto; max-width: 600px;
+}
+.command-box .comment { color: #78909c; }
+.command-box .prompt { color: #a5d6a7; }
+
+/* ── Architecture ── */
+.arch-diagram {
+  background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 24px; font: 14px/1.6 'SF Mono', 'Fira Code', monospace;
+  overflow-x: auto; margin: 0 auto; max-width: 600px;
+}
+.arch-line { display: flex; align-items: center; gap: 8px; padding: 2px 0; }
+.arch-line .label { color: var(--accent); font-weight: 600; min-width: 80px; }
+.arch-line .desc { color: var(--text2); font-size: 13px; }
+.arch-line .arrow { color: var(--text3); }
+
+/* ── Tech Stack ── */
+.tech-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.tech-tag {
+  padding: 6px 14px; border-radius: 20px; font-size: 13px;
+  background: var(--accent2); color: var(--accent); border: 1px solid transparent;
+}
+
+/* ── Footer ── */
+footer {
+  text-align: center; padding: 40px 20px; border-top: 1px solid var(--border);
+  color: var(--text3); font-size: 13px;
+}
+footer .links { display: flex; justify-content: center; gap: 16px; margin-bottom: 12px; }
+footer .links a { color: var(--text2); text-decoration: none; transition: color .15s; }
+footer .links a:hover { color: var(--accent); }
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  section { padding: 48px 16px; }
+  .features { grid-template-columns: 1fr; }
+  .install-steps { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<button id="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+
+<nav>
+  <a href="#screenshot">Preview</a>
+  <a href="#features">Features</a>
+  <a href="#install">Install</a>
+  <a href="#arch">Architecture</a>
+  <a href="https://github.com/68110923/rx-gui">GitHub</a>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="logo">Rx</div>
+  <h1>RX GUI</h1>
+  <p>Reasonix AI Coding Assistant for JetBrains IDE</p>
+  <p>JetBrains IDE 侧边栏 AI 编程助手</p>
+  <div class="sub">Built on DeepSeek-Reasonix · Streaming · Markdown · Diff Review</div>
+  <div class="btns">
+    <a class="primary" href="https://github.com/68110923/rx-gui/raw/main/build/distributions/rx-gui-0.2.0.zip">⬇ Download v0.2.0</a>
+    <a class="secondary" href="#features">Learn More →</a>
+  </div>
+  <div class="scroll-hint">scroll</div>
+</section>
+
+<!-- Screenshot -->
+<section id="screenshot">
+  <h2>Preview / 预览</h2>
+  <p class="section-sub">Sidebar AI chat in action · 侧边栏 AI 对话实况</p>
+  <div class="screenshot-wrap">
+    <img src="rx_gui_exhibit/rx_gui_preview.png" alt="RX GUI screenshot"/>
+  </div>
+</section>
+
+<!-- Features -->
+<section id="features">
+  <h2>Features / 核心功能</h2>
+  <p class="section-sub">Powered by DeepSeek-Reasonix, right in your IDE sidebar</p>
+  <div class="features">
+
+    <div class="feature">
+      <div class="icon">💬</div>
+      <h3>AI Chat</h3>
+      <p>Streaming chat with real-time Markdown rendering and code syntax highlighting.</p>
+      <p class="zh">流式 AI 对话，Markdown + 代码语法高亮实时渲染</p>
+    </div>
+
+    <div class="feature">
+      <div class="icon">🔍</div>
+      <h3>Review Mode</h3>
+      <p>Interactive diff for file edits — accept or reject changes with full control.</p>
+      <p class="zh">文件编辑交互式 Diff 审阅（接受 / 拒绝），安全可控</p>
+    </div>
+
+    <div class="feature">
+      <div class="icon">⚡</div>
+      <h3>Mode Switching</h3>
+      <p>Switch between review / auto / yolo modes for different use cases.</p>
+      <p class="zh">review / auto / yolo 模式一键切换，适配不同场景</p>
+    </div>
+
+    <div class="feature">
+      <div class="icon">🎯</div>
+      <h3>Model Presets</h3>
+      <p>auto / flash / pro presets with low to max reasoning depth control.</p>
+      <p class="zh">多种预设 + low~max 推理深度可选</p>
+    </div>
+
+    <div class="feature">
+      <div class="icon">💲</div>
+      <h3>Cost Tracking</h3>
+      <p>Real-time spending and balance display.</p>
+      <p class="zh">消费金额 &amp; 余额实时显示</p>
+    </div>
+
+    <div class="feature">
+      <div class="icon">📊</div>
+      <h3>Context Monitor</h3>
+      <p>Context window usage and cache hit ratio at a glance.</p>
+      <p class="zh">上下文窗口使用量 &amp; 缓存命中率实时监控</p>
+    </div>
+
+    <div class="feature">
+      <div class="icon">⌨️</div>
+      <h3>Slash Commands</h3>
+      <p>/model /mode /preset /effort /clear /help with autocomplete.</p>
+      <p class="zh">斜杠命令自动补全，快捷操作</p>
+    </div>
+
+    <div class="feature">
+      <div class="icon">📎</div>
+      <h3>Code Context</h3>
+      <p>Selected code in editor automatically attached to questions.</p>
+      <p class="zh">编辑器选中代码自动附带到问题中</p>
+    </div>
+
+    <div class="feature">
+      <div class="icon">🖥️</div>
+      <h3>Cross-platform</h3>
+      <p>Works on macOS / Windows / Linux — all JetBrains IDEs.</p>
+      <p class="zh">全平台支持，兼容所有 JetBrains IDE</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- Install -->
+<section id="install">
+  <h2>Install / 安装</h2>
+  <p class="section-sub">Get started in minutes</p>
+
+  <div class="install-steps">
+    <div class="install-step">
+      <div class="num">1</div>
+      <h4>Download</h4>
+      <p>Download the plugin ZIP from GitHub</p>
+    </div>
+    <div class="install-step">
+      <div class="num">2</div>
+      <h4>Install</h4>
+      <p>IDE → Settings → Plugins → ⚙ → Install from Disk</p>
+    </div>
+    <div class="install-step">
+      <div class="num">3</div>
+      <h4>Restart</h4>
+      <p>Restart IDE, then open the RX GUI tool window</p>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-bottom:32px">
+    <a class="download-btn" href="https://github.com/68110923/rx-gui/raw/main/build/distributions/rx-gui-0.2.0.zip">⬇ Download rx-gui-0.2.0.zip</a>
+  </div>
+
+  <h3 style="text-align:center;font-size:18px;font-weight:600;margin-bottom:16px">Prerequisites / 前置条件</h3>
+  <div class="prereq-list">
+    <div class="prereq-item"><span class="check">✓</span> JetBrains IDE (IntelliJ IDEA / PyCharm / etc.)</div>
+    <div class="prereq-item"><span class="check">✓</span> <code>npm install -g reasonix</code> — Reasonix CLI</div>
+    <div class="prereq-item"><span class="check">✓</span> <code>reasonix setup</code> — Configure DeepSeek API Key</div>
+  </div>
+
+  <h3 style="text-align:center;font-size:18px;font-weight:600;margin:32px 0 16px">Quick Start / 快速开始</h3>
+  <div class="command-box">
+    <span class="comment"># Verify installation</span><br>
+    <span class="prompt">$</span> reasonix version<br><br>
+    <span class="comment"># Run plugin in development mode</span><br>
+    <span class="prompt">$</span> ./gradlew runIde<br><br>
+    <span class="comment"># Build distribution ZIP</span><br>
+    <span class="prompt">$</span> ./gradlew buildPlugin<br>
+    <span class="comment"># → build/distributions/rx-gui-0.2.0.zip</span>
+  </div>
+</section>
+
+<!-- Architecture -->
+<section id="arch">
+  <h2>Architecture / 架构</h2>
+  <p class="section-sub">GUI · Protocol · Engine — three-layer design</p>
+
+  <div class="arch-diagram">
+    <div class="arch-line"><span class="label">GUI</span><span class="arrow">┄┄┄</span><span class="desc">JetBrains Plugin · Kotlin + JBCefBrowser</span></div>
+    <div class="arch-line"><span class="label" style="color:#22c55e">│</span></div>
+    <div class="arch-line"><span class="label">ACP</span><span class="arrow">┄┄┄</span><span class="desc">stdin/stdout JSON-RPC 2.0 (NDJSON)</span></div>
+    <div class="arch-line"><span class="label" style="color:#22c55e">│</span></div>
+    <div class="arch-line"><span class="label">Engine</span><span class="arrow">┄┄┄</span><span class="desc">Reasonix CLI · DeepSeek · MCP Tools</span></div>
+  </div>
+
+  <div style="text-align:center;margin-top:32px">
+    <p style="color:var(--text2);font-size:14px">
+      <b>Frontend:</b> Chromium (JBCefBrowser) · Custom Markdown Parser &nbsp;|&nbsp;
+      <b>Backend:</b> Kotlin · ACP Protocol &nbsp;|&nbsp;
+      <b>API:</b> REST + usage.jsonl fallback
+    </p>
+  </div>
+
+  <h3 style="text-align:center;font-size:18px;font-weight:600;margin:32px 0 16px">Tech Stack / 技术栈</h3>
+  <div class="tech-grid">
+    <span class="tech-tag">Kotlin</span>
+    <span class="tech-tag">JetBrains Platform</span>
+    <span class="tech-tag">JBCefBrowser</span>
+    <span class="tech-tag">JSON-RPC 2.0</span>
+    <span class="tech-tag">Gradle</span>
+    <span class="tech-tag">DeepSeek-Reasonix</span>
+    <span class="tech-tag">Markdown</span>
+    <span class="tech-tag">MCP</span>
+  </div>
+</section>
+
+<!-- Sponsor -->
+<section id="sponsor" style="padding-bottom:40px">
+  <h2>Support the Author / 支持作者</h2>
+  <p class="section-sub">If this plugin helps you, consider buying the author a coffee ☕</p>
+  <div style="display:flex;gap:24px;justify-content:center;flex-wrap:wrap">
+    <div style="text-align:center">
+      <img src="payment_code/weixin.jpg" alt="WeChat Pay" style="width:200px;height:200px;border-radius:12px;border:1px solid var(--border);box-shadow:var(--shadow)"/>
+      <p style="margin-top:8px;font-size:13px;color:var(--text2)">WeChat Pay / 微信赞赏</p>
+    </div>
+    <div style="text-align:center">
+      <img src="payment_code/alipay.jpg" alt="Alipay" style="width:200px;height:200px;border-radius:12px;border:1px solid var(--border);box-shadow:var(--shadow)"/>
+      <p style="margin-top:8px;font-size:13px;color:var(--text2)">Alipay / 支付宝赞赏</p>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="links">
+    <a href="https://esengine.github.io/DeepSeek-Reasonix/">Homepage</a>
+    <a href="https://github.com/68110923/rx-gui">GitHub</a>
+    <a href="https://github.com/68110923/rx-gui/issues">Issues</a>
+  </div>
+  <p>RX GUI — Reasonix AI Coding Assistant &nbsp;·&nbsp; Made with ❤️</p>
+</footer>
+
+<script>
+(function(){
+  var t = localStorage.getItem('rx-theme');
+  if (t) document.documentElement.setAttribute('data-theme', t);
+})();
+function toggleTheme() {
+  var cur = document.documentElement.getAttribute('data-theme');
+  var next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('rx-theme', next);
+}
+</script>
+</body>
+</html>

@@ -2,30 +2,69 @@
     <id>com.reasonix.gui</id>
     <name>RX GUI — Reasonix AI Coding Assistant</name>
     <version>0.2.0</version>
-    <vendor email="rx@reasonix.io" url="https://reasonix.io">Reasonix</vendor>
-
-    <icon>icons/pluginIcon.svg</icon>
+    <vendor email="68110923@qq.com" url="https://github.com/68110923">Reasonix</vendor>
 
     <description><![CDATA[
-        <h3>Reasonix AI 编程助手 — IDE 侧边栏 AI 对话</h3>
-        <p>在 JetBrains IDE 中直接与 Reasonix AI 对话，基于 DeepSeek V4 模型。
-        支持流式响应、Markdown 渲染、代码 Diff 审阅、费用实时显示。</p>
+        <h2>RX GUI — Reasonix AI Coding Assistant</h2>
 
-        <h4>核心功能</h4>
+        <p>
+        <b>An AI-powered coding assistant</b> right in your JetBrains IDE sidebar.
+        Built on the DeepSeek-Reasonix model, it supports streaming responses, Markdown rendering,interactive code diff review, and real-time cost tracking.
+        </p>
+        <p>
+        <b>基于 DeepSeek-Reasonix 的 AI 编程助手</b>，内置于 JetBrains IDE 侧边栏。
+        支持流式响应、Markdown 渲染、代码 Diff 交互审阅、实时费用追踪。
+        </p>
+
+        <h3>Features / 核心功能</h3>
         <ul>
-            <li>💬 <b>AI 对话</b> — 侧边栏流式聊天，Markdown + 代码语法高亮</li>
-            <li>🔍 <b>审查模式</b> — 文件编辑交互式 Diff（接受 / 拒绝），安全可控</li>
-            <li>⚡ <b>模式切换</b> — review / auto / yolo 一键切换，适配不同场景</li>
-            <li>🎯 <b>模型预设</b> — auto / flash / pro 预设 + low~max 推理深度</li>
-            <li>💲 <b>费用追踪</b> — 消费金额 & 余额实时显示</li>
-            <li>📊 <b>上下文监控</b> — 上下文窗口使用量 & 缓存命中率</li>
-            <li>⌨️ <b>斜杠命令</b> — /model /mode /preset /effort /clear /help 自动补全</li>
-            <li>📎 <b>代码上下文</b> — 编辑器选中代码自动附带</li>
-            <li>🖥️ <b>跨平台</b> — macOS / Windows / Linux</li>
+            <b>AI Chat</b>
+            <li>Sidebar streaming chat with Markdown + code syntax highlight</li>
+            <li>侧边栏流式 AI 对话，Markdown + 代码语法高亮</li>
+            <br/>
+            <b>Review Mode</b>
+            <li>Interactive diff for file edit (accept / reject), safe and controllable</li>
+            <li>文件编辑交互式 Diff 审阅（接受 / 拒绝），安全可控</li>
+            <br/>
+            <b>Mode Switching</b>
+            <li>review / auto / yolo with one click for different use cases</li>
+            <li>review / auto / yolo 模式一键切换</li>
+            <br/>
+            <b>Model Presets</b>
+            <li>auto / flash / pro presets + low~max reasoning depth</li>
+            <li>多种预设 + low~max 推理深度可选</li>
+            <br/>
+            <b>Cost Tracking</b>
+            <li>Real-time spending & balance display</li>
+            <li>消费金额 &amp; 余额实时显示</li>
+            <br/>
+            <b>Context Monitor</b>
+            <li>Context window usage & cache hit ratio</li>
+            <li>上下文窗口使用量 &amp; 缓存命中率</li>
+            <br/>
+            <b>Slash Commands</b>
+            <li>/model /mode /preset /effort /clear /help with autocomplete</li>
+            <li>斜杠命令自动补全</li>
+            <br/>
+            <b>Code Context</b>
+            <li>Selected code in editor automatically attached</li>
+            <li>编辑器选中代码自动附带</li>
+            <br/>
+            <b>Cross-platform</b>
+            <li>macOS / Windows / Linux</li>
+            <li>跨平台支持</li>
         </ul>
 
-        <h4>关键字</h4>
-        <p>AI, Coding, Assistant, DeepSeek, Reasonix, Chat, Code, 编程, 代码, 智能, 助手, 对话</p>
+        <hr/>
+
+        <p style="text-align:center">
+            <a href="https://github.com/68110923"><b>Homepage</b></a>
+            &nbsp;|&nbsp;
+            <a href="https://github.com/68110923/rx-gui"><b>GitHub</b></a>
+            &nbsp;|&nbsp;
+            <a href="https://github.com/68110923/rx-gui/issues"><b>Issues</b></a>
+        </p>
+        <br/>
     ]]></description>
 
     <change-notes><![CDATA[
@@ -44,7 +83,7 @@
 
     <depends>com.intellij.modules.platform</depends>
 
-    <idea-version since-build="243" until-build="251.*"/>
+    <idea-version since-build="243" until-build=""/>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow
