@@ -10,7 +10,7 @@
   --text3: #6c757d; --border: #dee2e6; --accent: #4F46E5; --accent2: #eef2ff;
   --accent-light: #818cf8; --card-bg: #ffffff; --shadow: 0 1px 3px rgba(0,0,0,.08);
   --shadow-lg: 0 4px 24px rgba(0,0,0,.1); --radius: 12px; --radius-sm: 8px;
-  --code-bg: #263238; --code-text: #eeffff;
+  --code-bg: #263238; --code-text: #eeffff; --section-alt: #f1f3f5;
   --hero-gradient: linear-gradient(135deg, #4F46E5 0%, #7c3aed 50%, #a855f7 100%);
 }
 :root[data-theme="dark"] {
@@ -18,13 +18,14 @@
   --text3: #71717a; --border: #27272a; --accent: #818cf8; --accent2: #1e1b4a;
   --accent-light: #6366f1; --card-bg: #1a1a23; --shadow: 0 1px 3px rgba(0,0,0,.3);
   --shadow-lg: 0 4px 24px rgba(0,0,0,.4); --code-bg: #1e1e1e; --code-text: #d4d4d4;
+  --section-alt: #15151e;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0f0f13; --bg2: #1a1a23; --bg3: #22222e; --text: #e4e4e7; --text2: #a1a1aa;
     --text3: #71717a; --border: #27272a; --accent: #818cf8; --accent2: #1e1b4a;
     --accent-light: #6366f1; --card-bg: #1a1a23; --shadow: 0 1px 3px rgba(0,0,0,.3);
-    --shadow-lg: 0 4px 24px rgba(0,0,0,.4);
+    --shadow-lg: 0 4px 24px rgba(0,0,0,.4); --section-alt: #15151e;
   }
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -33,6 +34,17 @@ body {
   font: 16px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
   background: var(--bg); color: var(--text);
   -webkit-font-smoothing: antialiased;
+}
+
+/* ── Section Full-width Wrappers ── */
+.section-wrap {
+  width: 100%; background: var(--bg);
+}
+.section-wrap.alt { background: var(--section-alt); }
+
+/* ── Container ── */
+.container {
+  max-width: 1024px; margin: 0 auto; padding: 80px 24px;
 }
 
 /* ── Theme Toggle ── */
@@ -64,9 +76,9 @@ nav a:hover { color: var(--accent); }
 
 /* ── Hero ── */
 .hero {
-  min-height: 100vh; display: flex; flex-direction: column;
+  width: 100%; min-height: 100vh; display: flex; flex-direction: column;
   align-items: center; justify-content: center; text-align: center;
-  padding: 80px 20px 60px;
+  padding: 80px 24px 60px;
   background: var(--hero-gradient);
   position: relative; overflow: hidden;
 }
@@ -87,10 +99,10 @@ nav a:hover { color: var(--accent); }
   line-height: 1.15; margin-bottom: 12px; letter-spacing: -.02em;
 }
 .hero p {
-  font-size: clamp(16px, 2vw, 20px); color: rgba(255,255,255,.85);
-  max-width: 600px; line-height: 1.6; margin-bottom: 8px;
+  font-size: clamp(14px, 2vw, 20px); color: rgba(255,255,255,.85);
+  max-width: 600px; line-height: 1.6; margin-bottom: 4px;
 }
-.hero .sub { font-size: 14px; color: rgba(255,255,255,.65); margin-bottom: 32px; }
+.hero .sub { font-size: clamp(12px, 1.4vw, 14px); color: rgba(255,255,255,.65); margin-bottom: 32px; }
 .hero .btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
 .hero .btns a {
   display: inline-flex; align-items: center; gap: 8px;
@@ -112,21 +124,18 @@ nav a:hover { color: var(--accent); }
 }
 @keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(8px)} }
 
-/* ── Section ── */
-section { padding: 80px 20px; max-width: 1024px; margin: 0 auto; }
-section h2 {
-  font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 8px;
+/* ── Section titles ── */
+.container h2 {
+  font-size: clamp(22px, 2.8vw, 28px); font-weight: 700; text-align: center; margin-bottom: 8px;
 }
-section .section-sub {
-  text-align: center; color: var(--text3); font-size: 15px; margin-bottom: 48px;
+.container .section-sub {
+  text-align: center; color: var(--text3); font-size: clamp(13px, 1.5vw, 15px); margin-bottom: 48px;
 }
 
 /* ── Screenshot ── */
-.screenshot-wrap {
-  text-align: center; margin-bottom: 16px;
-}
+.screenshot-wrap { text-align: center; }
 .screenshot-wrap img {
-  max-width: 100%; border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  max-width: 100%; height: auto; border-radius: var(--radius); box-shadow: var(--shadow-lg);
   border: 1px solid var(--border);
 }
 
@@ -144,7 +153,7 @@ section .section-sub {
 
 /* ── Install ── */
 .install-steps {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;
   margin-bottom: 24px;
 }
 .install-step {
@@ -163,9 +172,10 @@ section .section-sub {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600;
   background: var(--hero-gradient); color: #fff; text-decoration: none;
-  transition: all .2s; margin: 0 auto; width: fit-content;
+  transition: all .2s; width: fit-content;
 }
 .download-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(79,70,229,.3); }
+.download-wrap { text-align: center; }
 
 /* ── Prerequisites ── */
 .prereq-list { display: grid; gap: 8px; max-width: 600px; margin: 0 auto; }
@@ -174,14 +184,17 @@ section .section-sub {
   padding: 10px 16px; background: var(--card-bg); border: 1px solid var(--border);
   border-radius: var(--radius-sm); font-size: 14px;
 }
-.prereq-item .check { color: #22c55e; font-weight: 700; }
-.prereq-item code { font-size: 12px; background: var(--bg3); padding: 2px 6px; border-radius: 4px; }
+.prereq-item .check { color: #22c55e; font-weight: 700; flex-shrink: 0; }
+.prereq-item code {
+  font-size: 12px; background: var(--bg3); padding: 2px 6px; border-radius: 4px;
+  word-break: break-all;
+}
 
 /* ── Commands ── */
 .command-box {
   background: var(--code-bg); color: var(--code-text); border-radius: var(--radius);
   padding: 20px 24px; font: 14px/1.7 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-  overflow-x: auto; margin: 0 auto; max-width: 600px;
+  overflow-x: auto; max-width: 600px; margin: 0 auto;
 }
 .command-box .comment { color: #78909c; }
 .command-box .prompt { color: #a5d6a7; }
@@ -189,13 +202,18 @@ section .section-sub {
 /* ── Architecture ── */
 .arch-diagram {
   background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 24px; font: 14px/1.6 'SF Mono', 'Fira Code', monospace;
-  overflow-x: auto; margin: 0 auto; max-width: 600px;
+  padding: 24px; font: clamp(12px, 1.3vw, 14px)/1.6 'SF Mono', 'Fira Code', monospace;
+  overflow-x: auto; max-width: 600px; margin: 0 auto;
 }
 .arch-line { display: flex; align-items: center; gap: 8px; padding: 2px 0; }
-.arch-line .label { color: var(--accent); font-weight: 600; min-width: 80px; }
-.arch-line .desc { color: var(--text2); font-size: 13px; }
-.arch-line .arrow { color: var(--text3); }
+.arch-line .label { color: var(--accent); font-weight: 600; min-width: 80px; flex-shrink: 0; }
+.arch-line .desc { color: var(--text2); font-size: clamp(12px, 1.2vw, 13px); }
+.arch-line .arrow { color: var(--text3); flex-shrink: 0; }
+
+.tech-desc {
+  text-align: center; color: var(--text2); font-size: clamp(12px, 1.4vw, 14px);
+  margin-top: 32px;
+}
 
 /* ── Tech Stack ── */
 .tech-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
@@ -204,20 +222,54 @@ section .section-sub {
   background: var(--accent2); color: var(--accent); border: 1px solid transparent;
 }
 
+/* ── Sponsor / QR ── */
+.sponsor-grid {
+  display: flex; gap: 24px; justify-content: center; flex-wrap: wrap;
+}
+.sponsor-grid figure {
+  text-align: center; margin: 0;
+}
+.sponsor-grid img {
+  width: 200px; height: 200px; border-radius: 12px;
+  border: 1px solid var(--border); box-shadow: var(--shadow);
+  max-width: 100%; height: auto;
+}
+:root[data-theme="dark"] .sponsor-grid img,
+@media (prefers-color-scheme: dark) {
+  .sponsor-grid img { filter: brightness(.9); }
+}
+.sponsor-grid figcaption {
+  margin-top: 8px; font-size: 13px; color: var(--text2);
+}
+
 /* ── Footer ── */
 footer {
-  text-align: center; padding: 40px 20px; border-top: 1px solid var(--border);
+  text-align: center; padding: 40px 24px; border-top: 1px solid var(--border);
   color: var(--text3); font-size: 13px;
 }
-footer .links { display: flex; justify-content: center; gap: 16px; margin-bottom: 12px; }
+footer .links { display: flex; justify-content: center; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
 footer .links a { color: var(--text2); text-decoration: none; transition: color .15s; }
 footer .links a:hover { color: var(--accent); }
 
-/* ── Responsive ── */
+/* ── Mobile ── */
 @media (max-width: 640px) {
-  section { padding: 48px 16px; }
+  .container { padding: 48px 16px; }
   .features { grid-template-columns: 1fr; }
   .install-steps { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 28px; }
+  .hero .btns a { padding: 10px 20px; font-size: 14px; }
+  .sponsor-grid img { width: 160px; height: 160px; }
+  .command-box { font-size: 12px; padding: 14px 16px; }
+  .arch-diagram { padding: 16px; }
+}
+
+@media (max-width: 400px) {
+  .hero { padding: 60px 16px 40px; }
+  .hero .logo { width: 56px; height: 56px; font-size: 22px; }
+  .sponsor-grid { gap: 16px; }
+  .sponsor-grid img { width: 130px; height: 130px; }
+  nav { gap: 14px; }
+  nav a { font-size: 12px; }
 }
 </style>
 </head>
@@ -226,15 +278,16 @@ footer .links a:hover { color: var(--accent); }
 <button id="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
 
 <nav>
-  <a href="#screenshot">Preview</a>
+  <a href="#preview">Preview</a>
   <a href="#features">Features</a>
   <a href="#install">Install</a>
   <a href="#arch">Architecture</a>
+  <a href="#sponsor">Sponsor</a>
   <a href="https://github.com/68110923/rx-gui">GitHub</a>
 </nav>
 
-<!-- Hero -->
-<section class="hero">
+<!-- Hero: full width gradient -->
+<div class="hero">
   <div class="logo">Rx</div>
   <h1>RX GUI</h1>
   <p>Reasonix AI Coding Assistant for JetBrains IDE</p>
@@ -245,194 +298,204 @@ footer .links a:hover { color: var(--accent); }
     <a class="secondary" href="#features">Learn More →</a>
   </div>
   <div class="scroll-hint">scroll</div>
-</section>
+</div>
 
-<!-- Screenshot -->
-<section id="screenshot">
-  <h2>Preview / 预览</h2>
-  <p class="section-sub">Sidebar AI chat in action · 侧边栏 AI 对话实况</p>
-  <div class="screenshot-wrap">
-    <img src="rx_gui_exhibit/rx_gui_preview.png" alt="RX GUI screenshot"/>
+<!-- Preview -->
+<div class="section-wrap" id="preview">
+  <div class="container">
+    <h2>Preview / 预览</h2>
+    <p class="section-sub">Sidebar AI chat in action · 侧边栏 AI 对话实况</p>
+    <div class="screenshot-wrap">
+      <img src="https://raw.githubusercontent.com/68110923/rx-gui/main/src/main/resources/rx_gui_exhibit/rx_gui_preview.png" alt="RX GUI screenshot"/>
+    </div>
   </div>
-</section>
+</div>
 
 <!-- Features -->
-<section id="features">
-  <h2>Features / 核心功能</h2>
-  <p class="section-sub">Powered by DeepSeek-Reasonix, right in your IDE sidebar</p>
-  <div class="features">
+<div class="section-wrap alt" id="features">
+  <div class="container">
+    <h2>Features / 核心功能</h2>
+    <p class="section-sub">Powered by DeepSeek-Reasonix, right in your IDE sidebar</p>
+    <div class="features">
 
-    <div class="feature">
-      <div class="icon">💬</div>
-      <h3>AI Chat</h3>
-      <p>Streaming chat with real-time Markdown rendering and code syntax highlighting.</p>
-      <p class="zh">流式 AI 对话，Markdown + 代码语法高亮实时渲染</p>
+      <div class="feature">
+        <div class="icon">💬</div>
+        <h3>AI Chat</h3>
+        <p>Streaming chat with real-time Markdown rendering and code syntax highlighting.</p>
+        <p class="zh">流式 AI 对话，Markdown + 代码语法高亮实时渲染</p>
+      </div>
+
+      <div class="feature">
+        <div class="icon">🔍</div>
+        <h3>Review Mode</h3>
+        <p>Interactive diff for file edits — accept or reject changes with full control.</p>
+        <p class="zh">文件编辑交互式 Diff 审阅（接受 / 拒绝），安全可控</p>
+      </div>
+
+      <div class="feature">
+        <div class="icon">⚡</div>
+        <h3>Mode Switching</h3>
+        <p>Switch between review / auto / yolo modes for different use cases.</p>
+        <p class="zh">review / auto / yolo 模式一键切换，适配不同场景</p>
+      </div>
+
+      <div class="feature">
+        <div class="icon">🎯</div>
+        <h3>Model Presets</h3>
+        <p>auto / flash / pro presets with low to max reasoning depth control.</p>
+        <p class="zh">多种预设 + low~max 推理深度可选</p>
+      </div>
+
+      <div class="feature">
+        <div class="icon">💲</div>
+        <h3>Cost Tracking</h3>
+        <p>Real-time spending and balance display.</p>
+        <p class="zh">消费金额 &amp; 余额实时显示</p>
+      </div>
+
+      <div class="feature">
+        <div class="icon">📊</div>
+        <h3>Context Monitor</h3>
+        <p>Context window usage and cache hit ratio at a glance.</p>
+        <p class="zh">上下文窗口使用量 &amp; 缓存命中率实时监控</p>
+      </div>
+
+      <div class="feature">
+        <div class="icon">⌨️</div>
+        <h3>Slash Commands</h3>
+        <p>/model /mode /preset /effort /clear /help with autocomplete.</p>
+        <p class="zh">斜杠命令自动补全，快捷操作</p>
+      </div>
+
+      <div class="feature">
+        <div class="icon">📎</div>
+        <h3>Code Context</h3>
+        <p>Selected code in editor automatically attached to questions.</p>
+        <p class="zh">编辑器选中代码自动附带到问题中</p>
+      </div>
+
+      <div class="feature">
+        <div class="icon">🖥️</div>
+        <h3>Cross-platform</h3>
+        <p>Works on macOS / Windows / Linux — all JetBrains IDEs.</p>
+        <p class="zh">全平台支持，兼容所有 JetBrains IDE</p>
+      </div>
+
     </div>
-
-    <div class="feature">
-      <div class="icon">🔍</div>
-      <h3>Review Mode</h3>
-      <p>Interactive diff for file edits — accept or reject changes with full control.</p>
-      <p class="zh">文件编辑交互式 Diff 审阅（接受 / 拒绝），安全可控</p>
-    </div>
-
-    <div class="feature">
-      <div class="icon">⚡</div>
-      <h3>Mode Switching</h3>
-      <p>Switch between review / auto / yolo modes for different use cases.</p>
-      <p class="zh">review / auto / yolo 模式一键切换，适配不同场景</p>
-    </div>
-
-    <div class="feature">
-      <div class="icon">🎯</div>
-      <h3>Model Presets</h3>
-      <p>auto / flash / pro presets with low to max reasoning depth control.</p>
-      <p class="zh">多种预设 + low~max 推理深度可选</p>
-    </div>
-
-    <div class="feature">
-      <div class="icon">💲</div>
-      <h3>Cost Tracking</h3>
-      <p>Real-time spending and balance display.</p>
-      <p class="zh">消费金额 &amp; 余额实时显示</p>
-    </div>
-
-    <div class="feature">
-      <div class="icon">📊</div>
-      <h3>Context Monitor</h3>
-      <p>Context window usage and cache hit ratio at a glance.</p>
-      <p class="zh">上下文窗口使用量 &amp; 缓存命中率实时监控</p>
-    </div>
-
-    <div class="feature">
-      <div class="icon">⌨️</div>
-      <h3>Slash Commands</h3>
-      <p>/model /mode /preset /effort /clear /help with autocomplete.</p>
-      <p class="zh">斜杠命令自动补全，快捷操作</p>
-    </div>
-
-    <div class="feature">
-      <div class="icon">📎</div>
-      <h3>Code Context</h3>
-      <p>Selected code in editor automatically attached to questions.</p>
-      <p class="zh">编辑器选中代码自动附带到问题中</p>
-    </div>
-
-    <div class="feature">
-      <div class="icon">🖥️</div>
-      <h3>Cross-platform</h3>
-      <p>Works on macOS / Windows / Linux — all JetBrains IDEs.</p>
-      <p class="zh">全平台支持，兼容所有 JetBrains IDE</p>
-    </div>
-
   </div>
-</section>
+</div>
 
 <!-- Install -->
-<section id="install">
-  <h2>Install / 安装</h2>
-  <p class="section-sub">Get started in minutes</p>
+<div class="section-wrap" id="install">
+  <div class="container">
+    <h2>Install / 安装</h2>
+    <p class="section-sub">Get started in minutes</p>
 
-  <div class="install-steps">
-    <div class="install-step">
-      <div class="num">1</div>
-      <h4>Download</h4>
-      <p>Download the plugin ZIP from GitHub</p>
+    <div class="install-steps">
+      <div class="install-step">
+        <div class="num">1</div>
+        <h4>Download</h4>
+        <p>Download the plugin ZIP from GitHub</p>
+      </div>
+      <div class="install-step">
+        <div class="num">2</div>
+        <h4>Install</h4>
+        <p>IDE → Settings → Plugins → ⚙ → Install from Disk</p>
+      </div>
+      <div class="install-step">
+        <div class="num">3</div>
+        <h4>Restart</h4>
+        <p>Restart IDE, then open the RX GUI tool window</p>
+      </div>
     </div>
-    <div class="install-step">
-      <div class="num">2</div>
-      <h4>Install</h4>
-      <p>IDE → Settings → Plugins → ⚙ → Install from Disk</p>
+
+    <div class="download-wrap">
+      <a class="download-btn" href="https://github.com/68110923/rx-gui/raw/main/build/distributions/rx-gui-0.2.0.zip">⬇ Download rx-gui-0.2.0.zip</a>
     </div>
-    <div class="install-step">
-      <div class="num">3</div>
-      <h4>Restart</h4>
-      <p>Restart IDE, then open the RX GUI tool window</p>
+
+    <h3 style="text-align:center;font-size:18px;font-weight:600;margin:32px 0 16px">Prerequisites / 前置条件</h3>
+    <div class="prereq-list">
+      <div class="prereq-item"><span class="check">✓</span> JetBrains IDE (IntelliJ IDEA / PyCharm / etc.)</div>
+      <div class="prereq-item"><span class="check">✓</span> <code>npm install -g reasonix</code> — Reasonix CLI</div>
+      <div class="prereq-item"><span class="check">✓</span> <code>reasonix setup</code> — Configure DeepSeek API Key</div>
+    </div>
+
+    <h3 style="text-align:center;font-size:18px;font-weight:600;margin:32px 0 16px">Quick Start / 快速开始</h3>
+    <div class="command-box">
+      <span class="comment"># Verify installation</span><br>
+      <span class="prompt">$</span> reasonix version<br><br>
+      <span class="comment"># Run plugin in development mode</span><br>
+      <span class="prompt">$</span> ./gradlew runIde<br><br>
+      <span class="comment"># Build distribution ZIP</span><br>
+      <span class="prompt">$</span> ./gradlew buildPlugin<br>
+      <span class="comment"># → build/distributions/rx-gui-0.2.0.zip</span>
     </div>
   </div>
-
-  <div style="text-align:center;margin-bottom:32px">
-    <a class="download-btn" href="https://github.com/68110923/rx-gui/raw/main/build/distributions/rx-gui-0.2.0.zip">⬇ Download rx-gui-0.2.0.zip</a>
-  </div>
-
-  <h3 style="text-align:center;font-size:18px;font-weight:600;margin-bottom:16px">Prerequisites / 前置条件</h3>
-  <div class="prereq-list">
-    <div class="prereq-item"><span class="check">✓</span> JetBrains IDE (IntelliJ IDEA / PyCharm / etc.)</div>
-    <div class="prereq-item"><span class="check">✓</span> <code>npm install -g reasonix</code> — Reasonix CLI</div>
-    <div class="prereq-item"><span class="check">✓</span> <code>reasonix setup</code> — Configure DeepSeek API Key</div>
-  </div>
-
-  <h3 style="text-align:center;font-size:18px;font-weight:600;margin:32px 0 16px">Quick Start / 快速开始</h3>
-  <div class="command-box">
-    <span class="comment"># Verify installation</span><br>
-    <span class="prompt">$</span> reasonix version<br><br>
-    <span class="comment"># Run plugin in development mode</span><br>
-    <span class="prompt">$</span> ./gradlew runIde<br><br>
-    <span class="comment"># Build distribution ZIP</span><br>
-    <span class="prompt">$</span> ./gradlew buildPlugin<br>
-    <span class="comment"># → build/distributions/rx-gui-0.2.0.zip</span>
-  </div>
-</section>
+</div>
 
 <!-- Architecture -->
-<section id="arch">
-  <h2>Architecture / 架构</h2>
-  <p class="section-sub">GUI · Protocol · Engine — three-layer design</p>
+<div class="section-wrap alt" id="arch">
+  <div class="container">
+    <h2>Architecture / 架构</h2>
+    <p class="section-sub">GUI · Protocol · Engine — three-layer design</p>
 
-  <div class="arch-diagram">
-    <div class="arch-line"><span class="label">GUI</span><span class="arrow">┄┄┄</span><span class="desc">JetBrains Plugin · Kotlin + JBCefBrowser</span></div>
-    <div class="arch-line"><span class="label" style="color:#22c55e">│</span></div>
-    <div class="arch-line"><span class="label">ACP</span><span class="arrow">┄┄┄</span><span class="desc">stdin/stdout JSON-RPC 2.0 (NDJSON)</span></div>
-    <div class="arch-line"><span class="label" style="color:#22c55e">│</span></div>
-    <div class="arch-line"><span class="label">Engine</span><span class="arrow">┄┄┄</span><span class="desc">Reasonix CLI · DeepSeek · MCP Tools</span></div>
-  </div>
+    <div class="arch-diagram">
+      <div class="arch-line"><span class="label">GUI</span><span class="arrow">┄┄┄</span><span class="desc">JetBrains Plugin · Kotlin + JBCefBrowser</span></div>
+      <div class="arch-line"><span class="label" style="color:#22c55e">│</span></div>
+      <div class="arch-line"><span class="label">ACP</span><span class="arrow">┄┄┄</span><span class="desc">stdin/stdout JSON-RPC 2.0 (NDJSON)</span></div>
+      <div class="arch-line"><span class="label" style="color:#22c55e">│</span></div>
+      <div class="arch-line"><span class="label">Engine</span><span class="arrow">┄┄┄</span><span class="desc">Reasonix CLI · DeepSeek · MCP Tools</span></div>
+    </div>
 
-  <div style="text-align:center;margin-top:32px">
-    <p style="color:var(--text2);font-size:14px">
+    <div class="tech-desc">
       <b>Frontend:</b> Chromium (JBCefBrowser) · Custom Markdown Parser &nbsp;|&nbsp;
       <b>Backend:</b> Kotlin · ACP Protocol &nbsp;|&nbsp;
       <b>API:</b> REST + usage.jsonl fallback
-    </p>
-  </div>
+    </div>
 
-  <h3 style="text-align:center;font-size:18px;font-weight:600;margin:32px 0 16px">Tech Stack / 技术栈</h3>
-  <div class="tech-grid">
-    <span class="tech-tag">Kotlin</span>
-    <span class="tech-tag">JetBrains Platform</span>
-    <span class="tech-tag">JBCefBrowser</span>
-    <span class="tech-tag">JSON-RPC 2.0</span>
-    <span class="tech-tag">Gradle</span>
-    <span class="tech-tag">DeepSeek-Reasonix</span>
-    <span class="tech-tag">Markdown</span>
-    <span class="tech-tag">MCP</span>
+    <h3 style="text-align:center;font-size:18px;font-weight:600;margin:32px 0 16px">Tech Stack / 技术栈</h3>
+    <div class="tech-grid">
+      <span class="tech-tag">Kotlin</span>
+      <span class="tech-tag">JetBrains Platform</span>
+      <span class="tech-tag">JBCefBrowser</span>
+      <span class="tech-tag">JSON-RPC 2.0</span>
+      <span class="tech-tag">Gradle</span>
+      <span class="tech-tag">DeepSeek-Reasonix</span>
+      <span class="tech-tag">Markdown</span>
+      <span class="tech-tag">MCP</span>
+    </div>
   </div>
-</section>
+</div>
 
 <!-- Sponsor -->
-<section id="sponsor" style="padding-bottom:40px">
-  <h2>Support the Author / 支持作者</h2>
-  <p class="section-sub">If this plugin helps you, consider buying the author a coffee ☕</p>
-  <div style="display:flex;gap:24px;justify-content:center;flex-wrap:wrap">
-    <div style="text-align:center">
-      <img src="payment_code/weixin.jpg" alt="WeChat Pay" style="width:200px;height:200px;border-radius:12px;border:1px solid var(--border);box-shadow:var(--shadow)"/>
-      <p style="margin-top:8px;font-size:13px;color:var(--text2)">WeChat Pay / 微信赞赏</p>
-    </div>
-    <div style="text-align:center">
-      <img src="payment_code/alipay.jpg" alt="Alipay" style="width:200px;height:200px;border-radius:12px;border:1px solid var(--border);box-shadow:var(--shadow)"/>
-      <p style="margin-top:8px;font-size:13px;color:var(--text2)">Alipay / 支付宝赞赏</p>
+<div class="section-wrap" id="sponsor">
+  <div class="container">
+    <h2>Support the Author / 支持作者</h2>
+    <p class="section-sub">If this plugin helps you, consider buying the author a coffee ☕</p>
+    <div class="sponsor-grid">
+      <figure>
+        <img src="payment_code/weixin.jpg" alt="WeChat Pay"/>
+        <figcaption>WeChat Pay / 微信赞赏</figcaption>
+      </figure>
+      <figure>
+        <img src="payment_code/alipay.jpg" alt="Alipay"/>
+        <figcaption>Alipay / 支付宝赞赏</figcaption>
+      </figure>
     </div>
   </div>
-</section>
+</div>
 
 <!-- Footer -->
-<footer>
-  <div class="links">
-    <a href="https://esengine.github.io/DeepSeek-Reasonix/">Homepage</a>
-    <a href="https://github.com/68110923/rx-gui">GitHub</a>
-    <a href="https://github.com/68110923/rx-gui/issues">Issues</a>
-  </div>
-  <p>RX GUI — Reasonix AI Coding Assistant &nbsp;·&nbsp; Made with ❤️</p>
-</footer>
+<div class="section-wrap alt">
+  <footer>
+    <div class="links">
+      <a href="https://github.com/68110923">Homepage</a>
+      <a href="https://github.com/68110923/rx-gui">GitHub</a>
+      <a href="https://github.com/68110923/rx-gui/issues">Issues</a>
+    </div>
+    <p>RX GUI — Reasonix AI Coding Assistant &nbsp;·&nbsp; Made with ❤️</p>
+  </footer>
+</div>
 
 <script>
 (function(){
